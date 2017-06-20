@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="AnchorPane" prefHeight="220.0" prefWidth="320" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="capaPresentacion.FXMLConfigController">
+   <children>
+      <VBox>
+         <children>
+            <VBox prefHeight="60.0" spacing="15.0">
+               <children>
+                  <Label fx:id="cabecera" alignment="CENTER_RIGHT" text="Acagest">
+                     <VBox.margin>
+                        <Insets />
+                     </VBox.margin>
+                     <padding>
+                        <Insets left="15.0" top="10.0" />
+                     </padding></Label>
+                  <Label alignment="CENTER" prefWidth="320.0" text="Parámetros de Configuración" />
+               </children>
+            </VBox>
+            <HBox alignment="CENTER" prefHeight="80.0" prefWidth="320.0" spacing="10.0">
+               <children>
+                  <VBox alignment="CENTER_LEFT" prefWidth="160.0" spacing="10.0">
+                     <children>
+                        <Label text="Servidor:" />
+                        <Label text="Puerto:" />
+                        <Label text="Clave:" />
+                     </children>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox alignment="CENTER_RIGHT" spacing="10.0">
+                     <children>
+                        <TextField fx:id="servidorTxt" prefWidth="180.0">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin></TextField>
+                        <TextField fx:id="puertoTxt" prefWidth="180.0">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin></TextField>
+                        <TextField fx:id="claveTxt" />
+                     </children>
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="TOP_RIGHT" prefHeight="40.0" spacing="60.0">
+               <children>
+                  <Button fx:id="aceptarBtn" mnemonicParsing="false" onAction="#clickAceptarBtn" text="Aceptar">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin></Button>
+               </children>
+               <VBox.margin>
+                  <Insets right="10.0" />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

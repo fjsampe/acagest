@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="575.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="capaPresentacion.FXMLCursosController">
+   <center>
+      <VBox BorderPane.alignment="CENTER">
+         <children>
+            <VBox fx:id="formularioDatos" spacing="5.0">
+               <children>
+                  <HBox>
+                     <children>
+                        <GridPane prefWidth="435.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="130.0" minWidth="13.0" prefWidth="105.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="388.0" minWidth="10.0" prefWidth="255.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <TextField fx:id="codigoTxt" GridPane.columnIndex="1" />
+                              <TextField fx:id="descripcionTxt" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <TextField fx:id="importeTxt" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <ComboBox fx:id="formaPagoCmb" prefWidth="283.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                              <ComboBox fx:id="tutorCmb" prefWidth="283.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                                 <children>
+                                    <Label text="Código:" />
+                                    <Label text="*" textFill="RED">
+                                       <font>
+                                          <Font name="System Bold" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                 <children>
+                                    <Label text="Descripción:" />
+                                    <Label text="*" textFill="RED">
+                                       <font>
+                                          <Font name="System Bold" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="3">
+                                 <children>
+                                    <Label text="Forma pago:" />
+                                    <Label text="*" textFill="RED">
+                                       <font>
+                                          <Font name="System Bold" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
+                                 <children>
+                                    <Label text="Tutor:" />
+                                    <Label text="*" textFill="RED">
+                                       <font>
+                                          <Font name="System Bold" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
+                                 <children>
+                                    <Label text="Importe por Hora:" />
+                                    <Label text="*" textFill="RED">
+                                       <font>
+                                          <Font name="System Bold" size="11.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                           </children>
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                           <padding>
+                              <Insets right="5.0" />
+                           </padding>
+                        </GridPane>
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" />
+                     </padding>
+                  </HBox>
+                  <HBox alignment="CENTER" prefWidth="300.0">
+                     <children>
+                        <Line endX="100.0" startX="-100.0" />
+                     </children>
+                     <padding>
+                        <Insets bottom="5.0" top="5.0" />
+                     </padding>
+                  </HBox>
+                  <HBox spacing="19.0">
+                     <children>
+                        <Label text="Asignaturas:" />
+                        <ComboBox fx:id="asignaturaCmb" prefWidth="282.0" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="5.0">
+                     <children>
+                        <ListView fx:id="asignaturasListView" prefHeight="200.0" prefWidth="320.0" />
+                        <VBox spacing="10.0">
+                           <children>
+                              <Button fx:id="addAsignaturaBtn" mnemonicParsing="false" onAction="#clickAddAsignaturaBtn" />
+                              <Button fx:id="delAsignaturaBtn" mnemonicParsing="false" onAction="#clickDelAsignaturaBtn" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                     <children>
+                        <Button fx:id="btnAceptar" mnemonicParsing="false" onAction="#clickBtnAceptar" text="Aceptar" />
+                        <Button fx:id="btnCancelar" mnemonicParsing="false" onAction="#clickBtnCancelar" text="Cancelar" />
+                     </children>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+               <VBox.margin>
+                  <Insets left="5.0" right="5.0" />
+               </VBox.margin>
+            </VBox>
+            <HBox fx:id="barraOpciones" alignment="BOTTOM_LEFT" spacing="10.0">
+               <children>
+                  <Button fx:id="addBtn" mnemonicParsing="false" onAction="#clickAddBtn" />
+                  <Button fx:id="editBtn" mnemonicParsing="false" onAction="#clickEditBtn" />
+                  <Button fx:id="deleteBtn" mnemonicParsing="false" onAction="#clickDeleteBtn" />
+                  <Button fx:id="printBtn" mnemonicParsing="false" onAction="#clickPrintBtn" />
+                  <Label text="* Campos requeridos" textFill="RED">
+                     <font>
+                        <Font name="System Bold" size="11.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" top="10.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
+   <top>
+      <Label prefHeight="30.0" text="CURSOS" BorderPane.alignment="CENTER" />
+   </top>
+   <left>
+      <VBox prefWidth="200.0" spacing="5.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefWidth="200.0" spacing="5.0">
+               <children>
+                  <Label text="Búsqueda:" />
+                  <TextField fx:id="filtroTxt" prefWidth="135.0" />
+               </children>
+               <VBox.margin>
+                  <Insets left="5.0" />
+               </VBox.margin>
+            </HBox>
+            <ListView fx:id="cursosListView" prefHeight="495.0" />
+         </children>
+      </VBox>
+   </left>
+</BorderPane>

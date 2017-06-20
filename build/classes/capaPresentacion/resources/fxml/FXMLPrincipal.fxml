@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="capaPresentacion.FXMLPrincipalController">
+   <bottom>
+      <HBox prefHeight="20.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefWidth="400.0">
+               <children>
+                  <Label text="EMPRESA:" />
+                  <Label fx:id="empresaLbl" />
+               </children>
+            </HBox>
+            <HBox alignment="CENTER_RIGHT" prefWidth="400.0" spacing="2.0">
+               <children>
+                  <Label text="USUARIO:" />
+                  <Label fx:id="usernameLbl" text="Label" />
+                  <Label text="NIVEL:" />
+                  <Label fx:id="levelLbl" text="Label" />
+               </children>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </HBox>
+         </children>
+      </HBox>
+   </bottom>
+   <top>
+      <HBox fx:id="lineaMenu" prefHeight="160.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox fx:id="grupoConfig" prefHeight="175.0" style="-fx-background-color: #454eaa;">
+               <children>
+                  <VBox>
+                     <children>
+                        <Button fx:id="configuracionBtn" mnemonicParsing="false" onAction="#clickConfiguracionBtn" prefWidth="85.0" />
+                        <Button fx:id="usuariosBtn" mnemonicParsing="false" onAction="#clickUsuariosBtn" prefWidth="85.0" />
+                     </children>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+               </padding>
+            </HBox>
+            <HBox fx:id="grupoDatos" prefHeight="175.0" style="-fx-background-color: #CB4356;">
+               <children>
+                  <VBox>
+                     <children>
+                        <Button fx:id="alumnosBtn" mnemonicParsing="false" onAction="#clickAlumnosBtn" prefWidth="80.0" />
+                        <Button fx:id="profesoresBtn" mnemonicParsing="false" onAction="#clickProfesoresBtn" prefWidth="80.0" />
+                     </children>
+                  </VBox>
+                  <VBox>
+                     <children>
+                        <Button fx:id="asignaturasBtn" mnemonicParsing="false" onAction="#clickAsignaturasBtn" prefWidth="80.0" />
+                        <Button fx:id="cursosBtn" mnemonicParsing="false" onAction="#clickCursosBtn" prefWidth="80.0" />
+                     </children>
+                  </VBox>
+                  <VBox>
+                     <children>
+                        <Button fx:id="aulaBtn" mnemonicParsing="false" onAction="#clickAulaBtn" prefWidth="80.0" />
+                        <Button fx:id="planificadorBtn" mnemonicParsing="false" onAction="#clickPlanificadorBtn" prefWidth="80.0" />
+                     </children>
+                  </VBox>
+                  <VBox>
+                     <children>
+                        <Button fx:id="proveedorBtn" mnemonicParsing="false" onAction="#clickProveedorBtn" prefWidth="80.0" />
+                     </children>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+               </padding>
+            </HBox>
+            <HBox fx:id="grupoAcciones" prefHeight="175.0" style="-fx-background-color: #454eaa;">
+               <children>
+                  <VBox>
+                     <children>
+                        <Button fx:id="matricularBtn" mnemonicParsing="false" onAction="#clickMatricularBtn" prefWidth="80.0" />
+                        <Button fx:id="examinarBtn" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#clickExaminarBtn" prefWidth="80.0" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="12.0" layoutY="12.0">
+                     <children>
+                        <Button fx:id="gastosBtn" mnemonicParsing="false" onAction="#clickGastosBtn" prefWidth="80.0" />
+                        <Button fx:id="recibosBtn" mnemonicParsing="false" onAction="#clickRecibosBtn" prefWidth="80.0" />
+                     </children>
+                  </VBox>
+                  <VBox layoutX="92.0" layoutY="12.0">
+                     <children>
+                        <Button fx:id="utilidadesBtn" mnemonicParsing="false" onAction="#clickUtilidadesBtn" prefWidth="80.0" />
+                        <Button fx:id="acercaDeBtn" mnemonicParsing="false" onAction="#clickAcercaDeBtn" prefWidth="80.0" />
+                     </children>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+               </padding>
+            </HBox>
+         </children>
+      </HBox>
+   </top>
+</BorderPane>

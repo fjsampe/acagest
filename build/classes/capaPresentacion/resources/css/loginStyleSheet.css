@@ -1,0 +1,32 @@
+
+/* 
+    Created on : 07-mar-2017, 13:57:37
+    Author     : Francisco José Sampedro Lujan
+*/
+
+.root {
+-fx-background-color: #2B569A;
+-fx-font-family: "Arial";
+}
+
+.label {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size:16px;
+}
+
+#cabecera{
+    -fx-font-size:26px;
+}
+
+.button {
+-fx-background-color: #2B569A;
+-fx-text-fill: #FFFFFF;
+-fx-font-size:14px;
+-fx-effect: dropshadow(one-pass-box, #FFFFFF, 5, 1.5, 0, 0);
+}
+
+.text-input{
+    -fx-text-fill:#807F85;
+    -fx-font-size:14px;
+}
+
