@@ -3,8 +3,17 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/Acagest/src/capaNegocio/OperativasBD.java</file>
-            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/Acagest/src/capaPresentacion/FXMLUtilidadesController.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaPresentacion/FXMLUtilidadesController.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaNegocio/FichaMatricula.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaNegocio/OperativasBD.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaNegocio/Matricula.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaNegocio/FichaRecibo.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaDatos/BDPostgre.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaNegocio/Recibo.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaPresentacion/resources/fxml/FXMLRecibos.fxml</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaPresentacion/FXMLRecibosController.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaNegocio/ReciboGenerado.java</file>
+            <file>file:/C:/TCL/DAM/PROYECTO%20FIN%20CICLO/acagest/src/capaPresentacion/FXMLMatriculacionesController.java</file>
         </group>
     </open-files>
 </project-private>

@@ -5,6 +5,7 @@ import static capaDatos.Configuracion.guardarParametrosConfig;
 import static capaDatos.Configuracion.obtenerParametrosConfig;
 import static capaDatos.Configuracion.validarParametrosAccesoBD;
 import capaPresentacion.resources.Campos;
+import capaPresentacion.resources.Mensajes;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
@@ -13,6 +14,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -1554,7 +1556,7 @@ public class OperativasBD {
                 "NumRecibo SERIAL PRIMARY KEY,"+
                 "FechaEmision DATE,"+
                 "FechaPago DATE,"+
-                "Descripcion VARCHAR(60),"+
+                "Descripcion TEXT,"+
                 "Importe NUMERIC(8,2),"+
                 "NumFactura VARCHAR(12) REFERENCES FACTURAS,"+
                 "CodAlumno INTEGER NOT NULL REFERENCES ALUMNOS"+
@@ -1630,17 +1632,21 @@ public class OperativasBD {
         String codigoCursoActual="";
         String codigoCursoInicial="";
         String asignaturaActual="";
+        String descripcion="";
+        String sentencia="";
         ResultSet resultado=null;
-        resultado=ejecucionSentenciaDML("select alumnos.codalumno,alumnos.nombre,alumnos.apellidos,"+
+        sentencia="select alumnos.codalumno,alumnos.nombre,alumnos.apellidos,"+
                 "cursos.codcurso,cursos.descripcion,cursos.pago,asignaturas.codasignatura,"+
                 "cursos.importehora,asignaturas.cargahoras from matricular " +
                 "left join alumnos on matricular.codAlumno=alumnos.codAlumno " +
                 "left join cursos on matricular.codcurso=cursos.codcurso " +
                 "left join asignaturas on matricular.codasignatura=asignaturas.codasignatura " +
                 "where fechafin>=now() and fechainicio<=now() "+
-                "order by alumnos.codalumno,cursos.codcurso, asignaturas.codasignatura;");
+                "order by alumnos.codalumno,cursos.codcurso, asignaturas.codasignatura;";
+        resultado=ejecucionSentenciaDML(sentencia);
         try {
             if (resultado.isBeforeFirst()){
+                // Creación de clases
                 listaRecibos=new ArrayList<>();
                 while(resultado.next()){
                     codigoAlumnoActual=resultado.getInt(1);
@@ -1695,29 +1701,83 @@ public class OperativasBD {
                 curso.setAsignaturas(listaAsignaturas);
                 listaCursos.add(curso);
                 Recibo recibo=new Recibo(alumno, listaCursos,LocalDate.now());
-                int ultimoId=0;
                 listaRecibos.add(recibo);
+                
+                
+                //Comprobamos que los recibos a generar no están duplicados.
+
                 for (Recibo r:listaRecibos){
-                    for (Curso c:r.getCursos()){
-                        /*
-                        String sentencia="INSERT INTO recibos VALUES (default,'"+
-                            alumno.getNia()+"','"+alumno.getNombre()+"','"+alumno.getApellidos()+
-            "','"+alumno.getDomicilio()+"','"+alumno.getPoblacion()+
-            "','"+alumno.getCp()+"','"+alumno.getProvincia()+"',"+
-            (alumno.getNacimiento()==null?null:"'"+alumno.getNacimiento()+"'")+
-            ",'"+alumno.getTelefono()+"','"+alumno.getMovil()+
-            "','"+alumno.getPadre()+"','"+alumno.getDniPadre()+
-            "','"+alumno.getTelefonoPadre()+"','"+alumno.getEmailPadre()+
-            "','"+alumno.getMadre()+"','"+alumno.getDniMadre()+
-            "','"+alumno.getTelefonoMadre()+"','"+alumno.getEmailMadre()+
-            "','"+alumno.getCentro()+"','"+alumno.getObservaciones()+
-            "') RETURNING codAlumno;";
-        ResultSet resultado=ejecucionSentenciaDML(sentencia); 
-        ultimoId=extraerID(resultado);*/
+                    for (Iterator<Curso> iter = r.getCursos().listIterator(); iter.hasNext(); ) {
+                        Curso c = iter.next();
+                        switch(c.getPago()){
+                            case "A":   sentencia="select count(*) from recibos " +
+                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
+                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
+                                        "and codcurso='"+c.getCodigo()+"' "+
+                                        "and recibos.fechaemision>now()- interval '365 day';";
+                                        break;
+                            case "M":   sentencia="select count(*) from recibos " +
+                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
+                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
+                                        "and codcurso='"+c.getCodigo()+"' "+
+                                        "and recibos.fechaemision>now()- interval '1 month';";
+                                        break;
+                            case "S":   sentencia="select count(*) from recibos " +
+                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
+                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
+                                        "and codcurso='"+c.getCodigo()+"' "+
+                                        "and recibos.fechaemision>now()- interval '7 day';";
+                                        break;
+                        }
+                        
+                        
+                            resultado=ejecucionSentenciaDML(sentencia);
+                            if (resultado.next()){
+                                if(resultado.getInt(1)>0){
+                                    Mensajes.msgInfo("RECIBOS DUPLICADOS", "Para "+
+                                        r.getAlumno().getApellidos()+", "+r.getAlumno().getNombre()+
+                                        "Curso: "+c.getDescripcion()+" con pago "+c.getPago());
+                                    iter.remove();
+                                }
+                            }
+                        
+                    }
+                }
+                
+                // Creo los recibos 
+                boolean estadoInsercion=false;
+                Double importeBase=0.0;
+                int ultimoId=0;
+                for (Recibo r:listaRecibos){
+                    importeBase=0.0;
+                    descripcion=r.getAlumno().getNombre()+" "+r.getAlumno().getApellidos();
+                    if (r.getCursos().size()>0){
+                        for (Curso c:r.getCursos()) {
+                            descripcion=descripcion+" Curso:"+c.getDescripcion()+" ";
+                            for (Asignatura a:c.getAsignaturas()){
+                                importeBase=importeBase+(a.getCargaHoras()*c.getImporteHora());
+                            }
+                        }
+                        sentencia="INSERT INTO recibos VALUES (default,'"+
+                            LocalDate.now()+"',null,'"+descripcion+
+                            "',"+importeBase+",null,"+r.getAlumno().getCodigo()+
+                            ") RETURNING numRecibo;";
+                        resultado=ejecucionSentenciaDML(sentencia); 
+                        ultimoId=extraerID(resultado);
+                        if (ultimoId>0) estadoInsercion=true; 
+                        for (Curso c: r.getCursos()){
+                            sentencia="INSERT INTO detallar VALUES ('"+c.getCodigo()+"',"+
+                                ultimoId+");";
+                            if (ejecucionSentenciaDDL(sentencia)==1 && estadoInsercion){
+                                estadoInsercion=true;
+                            }else{
+                                estadoInsercion=false; 
+                            }
+                            if (!estadoInsercion) Mensajes.msgError("INSERCION RECIBOS", "Algo ha fallado..");
+                        }
                     }
                 }
             }
-            
         } catch (SQLException ex) {
             System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
         }
