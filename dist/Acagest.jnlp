@@ -8,7 +8,7 @@
   </information>
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
-    <jar href="Acagest.jar" size="401162" download="eager" />
+    <jar href="Acagest.jar" size="422697" download="eager" />
     <jar href="lib\commons-codec-1.5.jar" size="73098" download="eager" />
     <jar href="lib\itext5-itextpdf-5.5.11.jar" size="2309235" download="eager" />
     <jar href="lib\postgresql-42.0.0.jar" size="707261" download="eager" />

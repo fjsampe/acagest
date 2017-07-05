@@ -174,6 +174,14 @@ public class FXMLPrincipalController implements Initializable {
         cargadorPantallas.cargarPantalla("resources/fxml/FXMLGastos.fxml", "Gastos", new Stage(),"/capaPresentacion/resources/icons/gastos.png",true);
     }
     
+    
+    @FXML
+    private void clickRecibosBtn(ActionEvent event) {
+        cargadorPantallas.cargarPantalla("resources/fxml/FXMLRecibos.fxml", "Recibos", new Stage(),"/capaPresentacion/resources/icons/recibos.png",true);
+    
+    }
+    
+    
     @FXML
     private void clickUtilidadesBtn(ActionEvent event) {
         cargadorPantallas.cargarPantalla("resources/fxml/FXMLUtilidades.fxml", "Gastos", new Stage(),"/capaPresentacion/resources/icons/utilidades.png",true);
@@ -190,9 +198,9 @@ public class FXMLPrincipalController implements Initializable {
             "resources/icons/proveedores.png","resources/icons/matricular.png",
             "resources/icons/planificador.png","resources/icons/examinar.png",
             "resources/icons/acerca.png","resources/icons/gastos.png",
-            "resources/icons/utilidades.png"
+             "resources/icons/recibos.png","resources/icons/utilidades.png"
             };
-        ImageView[] iv=new ImageView[14];
+        ImageView[] iv=new ImageView[15];
         for (int i=0; i<icons.length; i++){
             iv[i]=new ImageView();
             iv[i].setImage(new Image(getClass().getResource(icons[i]).toExternalForm()));
@@ -236,8 +244,11 @@ public class FXMLPrincipalController implements Initializable {
         gastosBtn.setText("Gastos");
         gastosBtn.setGraphic(iv[12]);
         gastosBtn.setContentDisplay(ContentDisplay.TOP);
+        recibosBtn.setText("Recibos");
+        recibosBtn.setGraphic(iv[13]);
+        recibosBtn.setContentDisplay(ContentDisplay.TOP);
         utilidadesBtn.setText("Utilidades");
-        utilidadesBtn.setGraphic(iv[13]);
+        utilidadesBtn.setGraphic(iv[14]);
         utilidadesBtn.setContentDisplay(ContentDisplay.TOP);
         
         
@@ -267,9 +278,7 @@ public class FXMLPrincipalController implements Initializable {
         }
     }
 
-    @FXML
-    private void clickRecibosBtn(ActionEvent event) {
-    }
+    
 
     
 }

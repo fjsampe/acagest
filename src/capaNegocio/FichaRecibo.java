@@ -36,5 +36,12 @@ public class FichaRecibo {
         this.listaRecibos = listaRecibos;
     }
     
-    
+    /**
+     * Método que devuelve la cadena con el nombre del alumno
+     * @return  Devuelve el nombre completo de alumno
+     */
+    @Override
+    public String toString(){
+        return alumno.getApellidos()+", "+alumno.getNombre();
+    }
 }

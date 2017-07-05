@@ -5,6 +5,7 @@
  */
 package capaNegocio;
 
+import capaPresentacion.resources.Campos;
 import java.time.LocalDate;
 
 /**
@@ -35,6 +36,10 @@ public class ReciboGenerado {
     public void setRecibo(int recibo) {
         this.recibo = recibo;
     }
+    
+    public String getReciboFormateado(){
+        return String.format("%07d", recibo);
+    }
 
     public LocalDate getFechaEmision() {
         return fechaEmision;
@@ -46,6 +51,10 @@ public class ReciboGenerado {
 
     public LocalDate getFechaPago() {
         return fechaPago;
+    }
+    
+    public String getFechaPagoFormateado(){
+        return Campos.fechaToString(fechaPago);
     }
 
     public void setFechaPago(LocalDate fechaPago) {
@@ -66,6 +75,10 @@ public class ReciboGenerado {
 
     public void setImporte(double importe) {
         this.importe = importe;
+    }
+    
+    public String getImporteFormateado(){
+        return String.format("%.2f€", importe);
     }
 
     public String getFactura() {

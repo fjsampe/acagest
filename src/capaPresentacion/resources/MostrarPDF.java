@@ -9,11 +9,13 @@ import capaNegocio.FichaExamen;
 import capaNegocio.FichaGasto;
 import capaNegocio.FichaMatricula;
 import capaNegocio.FichaPlanificador;
+import capaNegocio.FichaRecibo;
 import capaNegocio.Gasto;
 import capaNegocio.Matricula;
 import capaNegocio.Plan;
 import capaNegocio.Profesor;
 import capaNegocio.Proveedor;
+import capaNegocio.ReciboGenerado;
 import capaNegocio.ShareData;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
@@ -23,13 +25,16 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javafx.collections.ObservableList;
 
 /**
@@ -237,7 +242,7 @@ public class MostrarPDF {
                 asignaturas.add(a.getCodigo());
                 asignaturas.add(a.getNombre());
             }
-            celdaDerecha.addElement(generaTabla(2,medidaCeldas,1,0,12,asignaturas));
+            celdaDerecha.addElement(generaTabla(2,medidaCeldas,1,0,12,asignaturas, false));
             tabla.addCell(celdaIzquierda);
             tabla.addCell(celdaDerecha);
             documento.add(tabla);
@@ -372,7 +377,7 @@ public class MostrarPDF {
                 matriculas.add(m.getFechaInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 matriculas.add(m.getFechaFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
             }
-            celdaDerecha.addElement(generaTabla(4,medidaCeldas2,1,0,12,matriculas));
+            celdaDerecha.addElement(generaTabla(4,medidaCeldas2,1,0,12,matriculas, true));
             tabla.addCell(celdaIzquierda);
             tabla.addCell(celdaDerecha);
             documento.add(tabla);
@@ -552,7 +557,7 @@ public class MostrarPDF {
             gastos.add(String.format("%10.2f",total));
             gastos.add(String.format("%10.2f",iva));
                                 
-            celdaDerecha.addElement(generaTabla(4,medidaCeldas2,1,0,12,gastos));
+            celdaDerecha.addElement(generaTabla(4,medidaCeldas2,1,0,12,gastos, false));
             tabla.addCell(celdaIzquierda);
             tabla.addCell(celdaDerecha);
             documento.add(tabla);
@@ -570,9 +575,14 @@ public class MostrarPDF {
      * @return              Devuelve la tabla Generada 
      */
     private PdfPTable generaCabecera(String nombreListado) {
-        PdfPTable tablaCabecera = new PdfPTable(3);
+        int columnas=(nombreListado==null)?2:3;
+        PdfPTable tablaCabecera = new PdfPTable(columnas);
         tablaCabecera.setWidthPercentage(100.0f);
-        float[] medidaCeldas = {1.50f, 4.10f, 4.40f};
+        float[] medidaCeldas;
+        medidaCeldas = new float[columnas];
+        medidaCeldas[0]=1.50f;
+        medidaCeldas[1]=4.10f;
+        if (columnas==3) medidaCeldas[2]=4.40f;
         try {
             tablaCabecera.setWidths(medidaCeldas);
             PdfPCell celdaLogo = new PdfPCell();
@@ -594,18 +604,21 @@ public class MostrarPDF {
             datos.add(ShareData.EMPRESA.getDomicilio());
             datos.add(ShareData.EMPRESA.getPoblacion());
             datos.add(ShareData.EMPRESA.getCp()+" - "+ShareData.EMPRESA.getProvincia());
+            datos.add(ShareData.EMPRESA.getTelefono());
             float[] medidaCeldasEmpresa = {2.00f};
-            PdfPTable bloqueDatosEmpresa = generaTabla(1,medidaCeldasEmpresa,1,0,8,datos);
-            celdaDatosEmpresa.addElement(bloqueDatosEmpresa);
-            PdfPCell celdaNombreListado = new PdfPCell();
-            celdaNombreListado.setPaddingLeft(8);
-            celdaNombreListado.setBorderWidth(0);      
-            celdaNombreListado.addElement(new Paragraph(nombreListado,
-                            FontFactory.getFont(FontFactory.HELVETICA,18, 
-                            Font.BOLDITALIC, new CMYKColor(0, 255, 255,17))));
+            PdfPTable bloqueDatosEmpresa = generaTabla(1,medidaCeldasEmpresa,1,0,8,datos, false);
+            celdaDatosEmpresa.addElement(bloqueDatosEmpresa); 
             tablaCabecera.addCell(celdaLogo);
             tablaCabecera.addCell(celdaDatosEmpresa);
-            tablaCabecera.addCell(celdaNombreListado);
+            if (columnas==3){
+                PdfPCell celdaNombreListado = new PdfPCell();
+                celdaNombreListado.setPaddingLeft(8);
+                celdaNombreListado.setBorderWidth(0);      
+                celdaNombreListado.addElement(new Paragraph(nombreListado,
+                            FontFactory.getFont(FontFactory.HELVETICA,18, 
+                            Font.BOLDITALIC, new CMYKColor(0, 255, 255,17))));
+                tablaCabecera.addCell(celdaNombreListado);
+            }
         } catch (DocumentException | IOException ex) {
             Mensajes.msgError("GENERACION PDF", "Error en la definición del PDF. No se puede generar. "+ex.getMessage());
         }
@@ -613,6 +626,10 @@ public class MostrarPDF {
     }
 
         
+   
+
+    
+    
     /**
      * Función que genera una subcabecera con los datos facilitados
      * @param referencias   Etiquetas Campos
@@ -636,7 +653,7 @@ public class MostrarPDF {
                 datos.add(contenidos[i]);
             }
             float[] medidaCeldasEmpresa = {3.31f,6.49f};
-            PdfPTable bloqueCabeceraAlumno = generaTabla(2,medidaCeldasEmpresa,1,0,12,datos);
+            PdfPTable bloqueCabeceraAlumno = generaTabla(2,medidaCeldasEmpresa,1,0,12,datos, false);
             celdaDatosAlumno.addElement(bloqueCabeceraAlumno);
             PdfPCell celdaFoto = new PdfPCell();
             if (imagen!=null){
@@ -664,7 +681,7 @@ public class MostrarPDF {
      */
     private PdfPTable generaCuerpo1(List<String> datos) {
         float[] medidaCeldas = {2.70f, 7.30f};
-        PdfPTable bloqueDatos = generaTabla(2,medidaCeldas,1,0,12,datos);
+        PdfPTable bloqueDatos = generaTabla(2,medidaCeldas,1,0,12,datos, false);
         return bloqueDatos;
     }
     
@@ -705,7 +722,7 @@ public class MostrarPDF {
             datos.add(alumno.getTelefonoPadre());
             datos.add("EMAIL:");
             datos.add(alumno.getEmailPadre());
-            PdfPTable bloqueDatosPadre = generaTabla(2,medidaCeldas,1,0,12,datos);
+            PdfPTable bloqueDatosPadre = generaTabla(2,medidaCeldas,1,0,12,datos, false);
             celdaDerechaSup.addElement(bloqueDatosPadre);
             celdaIzquierdaInf.addElement(new Paragraph("MADRE:"));
             datos=new ArrayList<>();
@@ -717,7 +734,7 @@ public class MostrarPDF {
             datos.add(alumno.getTelefonoMadre());
             datos.add("EMAIL:");
             datos.add(alumno.getEmailMadre());
-            PdfPTable bloqueDatosMadre = generaTabla(2,medidaCeldas,1,0,12,datos);
+            PdfPTable bloqueDatosMadre = generaTabla(2,medidaCeldas,1,0,12,datos, false);
             celdaDerechaInf.addElement(bloqueDatosMadre);
         } catch (DocumentException ex) {
             Mensajes.msgError("GENERACION PDF", "Error en la definición del PDF. No se puede generar. "+ex.getMessage());
@@ -739,7 +756,7 @@ public class MostrarPDF {
         datos.add("OBSERVACIONES:");
         datos.add(alumno.getObservaciones());
         float[] medidaCeldas = {2.70f, 7.30f};
-        PdfPTable bloqueDatosAlumno = generaTabla(2,medidaCeldas,1,0,12,datos);
+        PdfPTable bloqueDatosAlumno = generaTabla(2,medidaCeldas,1,0,12,datos, false);
         return bloqueDatosAlumno;
     }
     
@@ -753,20 +770,48 @@ public class MostrarPDF {
      * @param datos         Datos a visualizar
      * @return              Devuelve la tabla generada
      */
-    private PdfPTable generaTabla(int columnas, float[] sizeColumnas, int padding, int bordes, int sizeFuente, List<String> datos) {
+    private PdfPTable generaTabla(int columnas, float[] sizeColumnas, int padding, int bordes, int sizeFuente, List<String> datos, boolean bordesTabla) {
         Font fuente= new Font();
         fuente.setSize(sizeFuente);
         PdfPTable tabla=new PdfPTable(columnas);
         tabla.setWidthPercentage(100.0f);
+        int filasTotales=datos.size()/columnas;
         try {
             tabla.setWidths(sizeColumnas);
+            int numeroColumna=1;
+            int filas=1;
             for (String s: datos){
                 PdfPCell celda = new PdfPCell();
                 celda.setBorderWidth(bordes);
-                celda.setPadding(padding);
+                if (bordesTabla){
+                    if (filas==1){
+                        celda.setBorderWidthTop(1f);
+                    }
+                    if (numeroColumna==1){
+                        celda.setBorderWidthLeft(1f);
+                    } 
+                    if (filas==filasTotales){
+                        celda.setBorderWidthBottom   (1f);
+                    }
+                    if (numeroColumna==columnas){
+                        celda.setBorderWidthRight  (1f);
+                    } 
+                }
+                //celda.setPadding(padding);
+                celda.setPaddingLeft(padding);
+                celda.setPaddingRight(padding);
+                if (filas==filasTotales){
+                    celda.setPaddingBottom(padding);
+                }
+                
                 celda.setHorizontalAlignment(Element.ALIGN_LEFT);
                 celda.addElement(new Paragraph(s,fuente));
                 tabla.addCell(celda);
+                numeroColumna++;
+                if (numeroColumna>columnas){
+                    numeroColumna=1;
+                    filas++;
+                }
             } 
         } catch (DocumentException ex) {
             Mensajes.msgError("GENERACION PDF", "Error en la definición del PDF. No se puede generar. "+ex.getMessage());
@@ -774,5 +819,78 @@ public class MostrarPDF {
         return tabla;
     }
 
+    public void GenerarHojaRecibo(ReciboGenerado recibo,FichaRecibo datosAlumnoSeleccionado) {
+         try {
+            documento.open();
+            documento.add(generaCabecera(null));
+            float[] medidaSubCabecera={0.80f,1.00f,0.80f,1.00f};
+            List<String> datos=new ArrayList<>();
+            datos.add("Recibo:");
+            datos.add(String.format("%07d", recibo.getRecibo()));
+            datos.add("Fecha:");
+            datos.add(Campos.fechaToString(recibo.getFechaEmision()));
+            documento.add(generaTabla(4, medidaSubCabecera, 3, 0, 12, datos, false));
+            documento.add(new Paragraph(" "));
+            float[] medidas={1.00f};
+            datos.clear();
+            datos.add("Nombre: "+datosAlumnoSeleccionado.getAlumno().getNombre()+
+                    " "+datosAlumnoSeleccionado.getAlumno().getApellidos()+"\n"+
+            "Domicilio: "+datosAlumnoSeleccionado.getAlumno().getDomicilio()+"\n"+
+            "Población: "+datosAlumnoSeleccionado.getAlumno().getPoblacion()+"\n"+
+            "Provincia: "+datosAlumnoSeleccionado.getAlumno().getCp()+" - "+
+                    datosAlumnoSeleccionado.getAlumno().getProvincia());
+            documento.add(generaTabla(1, medidas , 4, 0, 12, datos, true));
+            documento.add(new Paragraph(" "));
+            float[] medidaCeldas = {4.00f, 1.00f};
+            PdfPTable tabla=new PdfPTable(medidaCeldas.length);
+            tabla.setWidthPercentage(100.0f);
+            tabla.setWidths(medidaCeldas);
+            String[] campos=new String[6];
+            campos[0]="DESCRIPCION";
+            campos[1]="IMPORTE";
+            campos[2]=recibo.getDescripcion();
+            campos[3]=String.format("%.2f", recibo.getImporte());
+            
+            
+            PdfPCell columnHeader;
+            
+            for (int column = 0; column < 2; column++) {
+                columnHeader = new PdfPCell(new Phrase(campos[column]));
+                columnHeader.setHorizontalAlignment(Element.ALIGN_LEFT);
+                columnHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);  
+                columnHeader.setBorderWidth(0);
+                columnHeader.setPadding(1);
+                tabla.addCell(columnHeader);
+            }
+            tabla.setHeaderRows(1);
+            tabla.addCell(campos[2]);
+            PdfPCell celdaDinero=new PdfPCell();
+            
+            //celdaDinero.setHorizontalAlignment(Element.ALIGN_RIGHT);
+            Paragraph preface = new Paragraph(campos[3]); 
+            preface.setAlignment(Element.ALIGN_RIGHT);
+            celdaDinero.addElement(preface);
+            celdaDinero.setVerticalAlignment(Element.ALIGN_CENTER);
+            tabla.addCell(celdaDinero);
+            documento.add(tabla);
+            documento.add(new Paragraph(" "));
+            documento.add(new Paragraph(" "));
+            documento.add(new Paragraph(" "));
+            datos.clear();
+            datos.add("Firma/Sello:");
+            datos.add(" ");
+            datos.add(" ");
+            datos.add(" ");
+            datos.add(" ");
+            documento.add(generaTabla(1, medidas , 4, 0, 12, datos, true));
+            documento.close();
+        } catch (DocumentException ex) {
+            Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Listado Asignaturas)");
+        }
+    }
+
+  
+
+    
     
 }

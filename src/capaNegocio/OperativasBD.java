@@ -1750,10 +1750,10 @@ public class OperativasBD {
                 int ultimoId=0;
                 for (Recibo r:listaRecibos){
                     importeBase=0.0;
-                    descripcion=r.getAlumno().getNombre()+" "+r.getAlumno().getApellidos();
+                    descripcion="";
                     if (r.getCursos().size()>0){
                         for (Curso c:r.getCursos()) {
-                            descripcion=descripcion+" Curso:"+c.getDescripcion()+" ";
+                            descripcion=descripcion+"Curso:"+c.getDescripcion()+" ";
                             for (Asignatura a:c.getAsignaturas()){
                                 importeBase=importeBase+(a.getCargaHoras()*c.getImporteHora());
                             }
@@ -1782,5 +1782,81 @@ public class OperativasBD {
             System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
         }
         return listaRecibos;
+    }
+
+    public static List<FichaRecibo> extraerFichasRecibos() {
+        int codigoActual=-1;
+        int codigoInicial=-1;
+        LocalDate fecha, fechaPago;
+        FichaRecibo ficha=null;
+        List<FichaRecibo> listaAlumnos=new ArrayList<>();
+        List<ReciboGenerado> listaPorAlumno = new ArrayList<>();
+        Alumno a=null;
+        ResultSet resultado=ejecucionSentenciaDML("select alumnos.CodAlumno,Nia,"+
+                "Nombre,Apellidos,Domicilio,Poblacion,Cp,Provincia,FechaNacimiento,"+
+                "Telefono,Movil,Padre,DniPadre,TelefonoPadre,Email1,Madre,DniMadre,"+
+                "TelefonoMadre,Email2,CentroEstudio,Foto,numrecibo,fechaemision,"+
+                "fechapago,descripcion,importe,numfactura from alumnos " +
+                "left join recibos on alumnos.codAlumno=recibos.codAlumno " +
+                "where recibos.codAlumno is not null "+
+                "order by alumnos.CodAlumno,numrecibo; ");
+        if (resultado!=null){
+            try {
+                while(resultado.next()){
+                    codigoActual=resultado.getInt(1);
+                    if (codigoInicial!=codigoActual){
+                        if (codigoInicial>-1){
+                            ficha=new FichaRecibo(a,listaPorAlumno);
+                            listaAlumnos.add(ficha);
+                            listaPorAlumno=new ArrayList<>();
+                        }   
+                        fecha=(resultado.getString(9)==null?null:Campos.stringToFecha(resultado.getString(9)));
+                    
+                        a=new Alumno(
+                            resultado.getString(2)!=null?resultado.getString(2):"",  //Nia
+                            resultado.getString(3)!=null?resultado.getString(3):"",  //Nombre
+                            resultado.getString(4)!=null?resultado.getString(4):"",  //Apellidos
+                            resultado.getString(5)!=null?resultado.getString(5):"",  //Domicilio
+                            resultado.getString(6)!=null?resultado.getString(6):"",  //Poblacion
+                            resultado.getString(7)!=null?resultado.getString(7):"",  //Cp
+                            resultado.getString(8)!=null?resultado.getString(8):"",  //Provincia
+                            fecha,  //FechaNacimiento
+                            resultado.getString(10)!=null?resultado.getString(10):"",//Telefono
+                            resultado.getString(11)!=null?resultado.getString(11):"",//Movil
+                            resultado.getString(12)!=null?resultado.getString(12):"",//Padre
+                            resultado.getString(13)!=null?resultado.getString(13):"",//DniPadre    
+                            resultado.getString(14)!=null?resultado.getString(14):"",//TelefonoPadre
+                            resultado.getString(15)!=null?resultado.getString(15):"",//Email1
+                            resultado.getString(16)!=null?resultado.getString(16):"",//Madre
+                            resultado.getString(17)!=null?resultado.getString(17):"",//DniMadre
+                            resultado.getString(18)!=null?resultado.getString(18):"",//TelefonoMadre
+                            resultado.getString(19)!=null?resultado.getString(19):"",//Email2
+                            resultado.getString(20)!=null?resultado.getString(20):"",//CentroEstudios
+                            "",                                                      //Observaciones
+                            resultado.getBytes(21));                                  //Foto   
+                            a.setCodigo(resultado.getInt(1));
+                        
+                        codigoInicial=codigoActual;
+                    } 
+                    if (resultado.getString(22)!=null){
+                        fecha=(resultado.getString(23)==null?null:Campos.stringToFecha(resultado.getString(23)));
+                        fechaPago=(resultado.getString(24)==null?null:Campos.stringToFecha(resultado.getString(24)));
+                    
+                    
+                            ReciboGenerado r=new ReciboGenerado(resultado.getInt(22),
+                                fecha,fechaPago,resultado.getString(25),
+                                resultado.getDouble(26),resultado.getString(27));
+                            listaPorAlumno.add(r);
+                    }
+                }
+                if (listaAlumnos!=null){
+                    ficha=new FichaRecibo(a,listaPorAlumno);
+                    listaAlumnos.add(ficha); 
+                }
+            } catch (SQLException ex) {
+                System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+            }
+        }
+        return listaAlumnos;
     }
 }
