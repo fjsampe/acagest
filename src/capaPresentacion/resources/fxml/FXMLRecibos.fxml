@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="capaPresentacion.FXMLRecibosController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="830.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="capaPresentacion.FXMLRecibosController">
    <center>
       <VBox BorderPane.alignment="CENTER">
          <children>
@@ -23,35 +23,46 @@
                <children>
                   <HBox fx:id="formularioDatosAlumno">
                      <children>
-                        <GridPane prefWidth="435.0">
+                        <GridPane prefWidth="490.0">
                           <columnConstraints>
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="130.0" minWidth="10.0" prefWidth="104.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="388.0" minWidth="10.0" prefWidth="326.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="130.0" minWidth="10.0" prefWidth="73.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="458.0" minWidth="10.0" prefWidth="456.0" />
                           </columnConstraints>
                           <rowConstraints>
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                               <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <Label text="NIA:" />
-                              <Label text="Apellidos:" GridPane.rowIndex="2" />
-                              <Label text="Nombre:" GridPane.rowIndex="1" />
-                              <Label text="Domicilio:" GridPane.rowIndex="3" />
-                              <Label text="Población:" GridPane.rowIndex="4" />
-                              <Label text="Provincia:" GridPane.rowIndex="5" />
-                              <TextField fx:id="niaTxt" GridPane.columnIndex="1" />
-                              <TextField fx:id="nombreTxt" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <TextField fx:id="apellidosTxt" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                              <TextField fx:id="domicilioTxt" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <TextField fx:id="poblacionTxt" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                              <HBox alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                              <Label text="Alumno:" />
+                              <Label text="Domicilio:" GridPane.rowIndex="1" />
+                              <Label text="Población:" GridPane.rowIndex="2" />
+                              <TextField fx:id="domicilioTxt" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                  <children>
+                                    <TextField fx:id="poblacionTxt" prefWidth="200.0" />
                                     <TextField fx:id="cpTxt" prefWidth="100.0" />
-                                    <TextField fx:id="provinciaTxt" prefWidth="265.0" />
+                                    <TextField fx:id="provinciaTxt" prefWidth="200.0" />
+                                 </children>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                 <children>
+                                    <TextField fx:id="niaTxt" prefWidth="100.0" />
+                                    <TextField fx:id="nombreTxt" prefWidth="334.0" />
+                                 </children>
+                              </HBox>
+                              <Label text="Teléfonos:" GridPane.rowIndex="3" />
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                                 <children>
+                                    <TextField fx:id="telefonoTxt" prefWidth="110.0" />
+                                    <TextField fx:id="movilTxt" prefWidth="110.0" />
+                                    <Label prefWidth="100.0" text="Fecha Nacimiento:">
+                                       <padding>
+                                          <Insets left="5.0" />
+                                       </padding>
+                                    </Label>
+                                    <TextField fx:id="fechaNacimientoTxt" prefWidth="120.0" />
                                  </children>
                               </HBox>
                            </children>
@@ -64,7 +75,7 @@
                         </GridPane>
                         <VBox alignment="CENTER" spacing="2.0">
                            <children>
-                              <ImageView fx:id="fotoImg" fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="fotoImg" fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true">
                                  <VBox.margin>
                                     <Insets left="5.0" />
                                  </VBox.margin></ImageView>
@@ -76,24 +87,24 @@
                      <children>
                         <VBox>
                            <children>
-                              <HBox prefWidth="630.0" spacing="5.0">
+                              <HBox prefWidth="730.0" spacing="5.0">
                                  <children>
-                                    <TableView fx:id="recibosTable" prefHeight="350.0" prefWidth="620.0">
+                                    <TableView fx:id="recibosTable" prefHeight="350.0" prefWidth="630.0">
                                       <columns>
                                         <TableColumn fx:id="numeroReciboCol" prefWidth="55.0" text="RECIBO" />
                                           <TableColumn fx:id="fechaEmisionReciboCol" prefWidth="65.0" text="EMISIÓN" />
                                         <TableColumn fx:id="fechaPagoReciboCol" prefWidth="100.0" text="PAGADO" />
-                                          <TableColumn fx:id="descripcionReciboCol" prefWidth="210.0" text="DESCRIPCIÓN" />
-                                          <TableColumn fx:id="importeReciboCol" prefWidth="65.0" text="IMPORTE" />
-                                          <TableColumn fx:id="facturaReciboCol" prefWidth="63.0" text="FACTURA" />
+                                          <TableColumn fx:id="descripcionReciboCol" prefWidth="241.0" text="DESCRIPCIÓN" />
+                                          <TableColumn fx:id="importeReciboCol" prefWidth="60.0" text="IMPORTE" />
+                                          <TableColumn fx:id="checkCol" prefWidth="60.0" text="Facturar?" />
                                       </columns>
                                     </TableView>
                                     <VBox prefHeight="200.0" prefWidth="90.0">
                                        <children>
-                                          <Button fx:id="addReciboBtn" mnemonicParsing="false" onAction="#clickAddReciboBtn" />
                                           <Button fx:id="delReciboBtn" mnemonicParsing="false" onAction="#clickDelReciboBtn" />
                                           <Button fx:id="editarReciboBtn" mnemonicParsing="false" onAction="#clickEditarReciboBtn" />
                                           <Button fx:id="impReciboBtn" layoutX="10.0" layoutY="54.0" mnemonicParsing="false" onAction="#clickImpReciboBtn" />
+                                          <Button fx:id="facturarBtn" layoutX="10.0" layoutY="54.0" mnemonicParsing="false" onAction="#clickFacturarBtn" />
                                        </children>
                                     </VBox>
                                  </children>

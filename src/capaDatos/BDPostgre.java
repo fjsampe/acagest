@@ -2,6 +2,7 @@ package capaDatos;
 
 import capaPresentacion.resources.Mensajes;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -164,4 +165,6 @@ public class BDPostgre {
        }
        return resultado;
     }
+    
+    
 }

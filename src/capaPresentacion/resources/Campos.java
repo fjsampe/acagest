@@ -121,7 +121,8 @@ public class Campos {
                         campoFecha.setValue(null);
                 }else{
                     try{
-                        campoFecha.setValue(LocalDate.parse(campoFecha.getEditor().getText(),DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                        campoFecha.setValue(LocalDate.parse(campoFecha.getEditor().getText(),DateTimeFormatter.ofPattern("d/MM/yyyy")));
+                        campoFecha.getEditor().setText(fechaToString(campoFecha.getValue()));
                     }catch(DateTimeParseException e){
                         Mensajes.msgError("ERROR CAMPO", "El dato introducido no es una fecha válida");
                         campoFecha.setValue(null);
@@ -149,5 +150,17 @@ public class Campos {
     
     public static LocalDate stringToFecha(String fecha){
         return (LocalDate.parse(fecha));
+    }
+    
+    public static boolean validarCampoNumerico(String numero){
+        double num;
+        boolean validacion=true;
+        try{
+            num=Double.parseDouble(numero);
+        }catch(NumberFormatException ex){
+            Mensajes.msgError("DATO NUMÉRICO", "Error en el dato introducido. Revise por favor..");
+            validacion=false;
+        }
+        return validacion;
     }
 }

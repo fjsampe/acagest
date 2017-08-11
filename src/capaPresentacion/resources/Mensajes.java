@@ -50,12 +50,12 @@ public class Mensajes {
      * @param message   Mensaje
      * @return          Devuelve booleano (True=Aceptar, False=Cancelar)
      */
-    public static boolean msgPregunta(String message) {
+    public static boolean msgPregunta(String mensaje1, String mensaje2, String mensaje3) {
         boolean deleteItem = false;
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Borrado elemento");
-        alert.setHeaderText(message);
-        alert.setContentText("¿Quieres borrar este elemento?");
+        alert.setTitle(mensaje1);
+        alert.setHeaderText(mensaje2);
+        alert.setContentText(mensaje3);
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.OK) {
             deleteItem = true;

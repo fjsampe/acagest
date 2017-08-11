@@ -7,6 +7,7 @@ package capaNegocio;
 
 import capaPresentacion.resources.Campos;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  *
@@ -19,8 +20,13 @@ public class ReciboGenerado {
     private String descripcion;
     private double importe;
     private String factura;
+    private boolean check;
 
-    public ReciboGenerado(int recibo, LocalDate fechaEmision, LocalDate fechaPago, String descripcion, double importe, String factura) {
+    
+ 
+
+    public ReciboGenerado(int recibo, LocalDate fechaEmision, LocalDate fechaPago, 
+        String descripcion, double importe, String factura) {
         this.recibo = recibo;
         this.fechaEmision = fechaEmision;
         this.fechaPago = fechaPago;
@@ -43,6 +49,10 @@ public class ReciboGenerado {
 
     public LocalDate getFechaEmision() {
         return fechaEmision;
+    }
+    
+    public String getFechaEmisionFormateado(){
+        return Campos.fechaToString(fechaEmision);
     }
 
     public void setFechaEmision(LocalDate fechaEmision) {
@@ -84,10 +94,73 @@ public class ReciboGenerado {
     public String getFactura() {
         return factura;
     }
+    
+    public String getFacturaFormateado() {
+        String facturaFormateada="";
+        if (fechaPago!=null && factura!=null){
+            facturaFormateada=fechaPago.getYear()+"/"+String.format("%05d", Integer.parseInt(factura));
+        }
+        return facturaFormateada;
+    }
 
     public void setFactura(String factura) {
         this.factura = factura;
     }
+    
+    public boolean getCheck() {
+        return check;
+    }
+
+    public void setCheck(boolean check) {
+        this.check = check;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 67 * hash + this.recibo;
+        hash = 67 * hash + Objects.hashCode(this.fechaEmision);
+        hash = 67 * hash + Objects.hashCode(this.fechaPago);
+        hash = 67 * hash + Objects.hashCode(this.descripcion);
+        hash = 67 * hash + (int) (Double.doubleToLongBits(this.importe) ^ (Double.doubleToLongBits(this.importe) >>> 32));
+        hash = 67 * hash + Objects.hashCode(this.factura);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ReciboGenerado other = (ReciboGenerado) obj;
+        if (this.recibo != other.recibo) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.importe) != Double.doubleToLongBits(other.importe)) {
+            return false;
+        }
+        if (!Objects.equals(this.descripcion, other.descripcion)) {
+            return false;
+        }
+        if (!Objects.equals(this.factura, other.factura)) {
+            return false;
+        }
+        if (!Objects.equals(this.fechaEmision, other.fechaEmision)) {
+            return false;
+        }
+        if (!Objects.equals(this.fechaPago, other.fechaPago)) {
+            return false;
+        }
+        return true;
+    }
+
+    
     
     
 }

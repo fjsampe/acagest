@@ -126,7 +126,7 @@ public class FXMLAsignaturasController implements Initializable {
     private void clickDeleteBtn(ActionEvent event) {
         if (asignaturasListView.getSelectionModel().getSelectedIndex()>-1){
             Asignatura asignatura=asignaturasListView.getSelectionModel().getSelectedItem();
-            if (Mensajes.msgPregunta(asignatura.getNombre()+"("+asignatura.getCodigo()+") será borrado.")) {
+            if (Mensajes.msgPregunta("Borrado elemento", asignatura.getNombre()+"("+asignatura.getCodigo()+") será borrado.","¿Quieres borrar el elemento?")) {
                 if (OperativasBD.borrarAsignatura(asignatura)){
                     Mensajes.msgInfo("ACCION:", "El borrado de la Asignatura ha sido realizado");
                     asignaturasObsList.remove(asignatura);

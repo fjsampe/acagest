@@ -125,7 +125,7 @@ public class FXMLAulasController implements Initializable {
     private void clickDeleteBtn(ActionEvent event) {
         if (aulasListView.getSelectionModel().getSelectedIndex()>-1){
             Aula aula=aulasListView.getSelectionModel().getSelectedItem();
-            if (Mensajes.msgPregunta(aula.getDescripcion()+"("+aula.getCodigo()+") será borrada.")) {
+            if (Mensajes.msgPregunta("Borrar elemento",aula.getDescripcion()+"("+aula.getCodigo()+") será borrada.","¿Quieres borrar el elemento?")) {
                 if (OperativasBD.borrarAula(aula)){
                     Mensajes.msgInfo("ACCION:", "El borrado del Aula ha sido realizado");
                     aulasObsList.remove(aula);

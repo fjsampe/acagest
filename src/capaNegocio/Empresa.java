@@ -31,6 +31,9 @@ public class Empresa {
     private String provincia;
     private String telefono;
     private String email;
+    private String impuesto;
+    private double porcentajeImpuesto;
+    private boolean tutorPorCurso;
     private byte[] logo;
 
     /**
@@ -41,17 +44,20 @@ public class Empresa {
 
     /**
      * Constructor parametrizado
-     * @param nif       Nif de la empresa
-     * @param nombre    Nombre de la empresa
-     * @param domicilio Domicilio de la empresa
-     * @param poblacion Población de la empresa
-     * @param cp        Código postal de la empresa
-     * @param provincia Província de la empresa
-     * @param telefono  Teléfono de la empresa
-     * @param email     Email de la empresa
+     * @param nif                   Nif de la empresa
+     * @param nombre                Nombre de la empresa
+     * @param domicilio             Domicilio de la empresa
+     * @param poblacion             Población de la empresa
+     * @param cp                    Código postal de la empresa
+     * @param provincia             Província de la empresa
+     * @param telefono              Teléfono de la empresa
+     * @param email                 Email de la empresa
+     * @param impuesto              Descripción del impuesto
+     * @param porcentajeImpuesto    Porcentaje de impuesto
+     * @param tutorPorCurso         Tutor por curso (true/false)
      * @param logo      Logo de la empresa
      */
-    public Empresa(String nif, String nombre, String domicilio, String poblacion, String cp, String provincia, String telefono, String email, byte[] logo) {
+    public Empresa(String nif, String nombre, String domicilio, String poblacion, String cp, String provincia, String telefono, String email, String impuesto, double porcentajeImpuesto, boolean tutorPorCurso, byte[] logo) {
         this.nif = nif;
         this.nombre = nombre;
         this.domicilio = domicilio;
@@ -60,6 +66,9 @@ public class Empresa {
         this.provincia = provincia;
         this.telefono = telefono;
         this.email = email;
+        this.impuesto = impuesto;
+        this.porcentajeImpuesto = porcentajeImpuesto;
+        this.tutorPorCurso = tutorPorCurso;
         this.logo = logo;
     }
 
@@ -191,6 +200,63 @@ public class Empresa {
         this.email = email;
     }
 
+    /**
+     * Getter descripción del impuesto
+     * @return  Devuelve el nombre del impuesto
+     */
+    public String getImpuesto() {
+        return impuesto;
+    }
+
+    /**
+     * Setter del nombre del impuesto
+     * @param impuesto  Nombre del impuesto
+     */
+    public void setImpuesto(String impuesto) {
+        this.impuesto = impuesto;
+    }
+
+    /**
+     * Getter porcentaje de impuesto
+     * @return  Devuelve el porcentaje del impuesto
+     */
+    public double getPorcentajeImpuesto() {
+        return porcentajeImpuesto;
+    }
+    
+    /**
+     * Getter porcentaje de impuesto formateado
+     * @return  Devuelve el porcentaje del impuesto
+     */
+    public String getPorcentajeImpuestoFormateado() {
+        return String.format("%.2f",porcentajeImpuesto);
+    }
+
+    /**
+     * Setter porcentaje de impuesto
+     * @param porcentajeImpuesto    Porcentaje de impuesto
+     */
+    public void setPorcentajeImpuesto(double porcentajeImpuesto) {
+        this.porcentajeImpuesto = porcentajeImpuesto;
+    }
+
+
+    /**
+     * Getter tutor por curso 
+     * @return Devuelve True=Tutor por Curso - False=Tutor con varios cursos
+     */
+    public boolean isTutorPorCurso() {
+        return tutorPorCurso;
+    }
+
+    /**
+     * Setter tutor por curso
+     * @param tutorPorCurso True=Tutor por Curso - False=Tutor con varios cursos
+     */
+    public void setTutorPorCurso(boolean tutorPorCurso) {
+        this.tutorPorCurso = tutorPorCurso;
+    }
+    
     /**
      * Getter logo de la empresa
      * @return  Devuelve el logo de la empresa

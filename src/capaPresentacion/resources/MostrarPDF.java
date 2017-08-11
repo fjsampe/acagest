@@ -4,14 +4,19 @@ import capaNegocio.Alumno;
 import capaNegocio.Asignatura;
 import capaNegocio.Aula;
 import capaNegocio.Curso;
+import capaNegocio.DiaOcupacion;
 import capaNegocio.Examen;
+import capaNegocio.Factura;
 import capaNegocio.FichaExamen;
+import capaNegocio.FichaFactura;
 import capaNegocio.FichaGasto;
 import capaNegocio.FichaMatricula;
 import capaNegocio.FichaPlanificador;
 import capaNegocio.FichaRecibo;
 import capaNegocio.Gasto;
 import capaNegocio.Matricula;
+import capaNegocio.Movimiento;
+import capaNegocio.OcupacionAula;
 import capaNegocio.Plan;
 import capaNegocio.Profesor;
 import capaNegocio.Proveedor;
@@ -30,6 +35,7 @@ import com.itextpdf.text.pdf.CMYKColor;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -104,19 +110,19 @@ public class MostrarPDF {
             contenidos[1]=alumno.getApellidos()+", "+alumno.getNombre();
             documento.add(generaCabeceraReferencia(referencias,contenidos,
                     alumno.getFoto()));
-            List<String> datos=new ArrayList<>();
-            datos.add("DOMICILIO:");
-            datos.add(alumno.getDomicilio());
-            datos.add("POBLACION:");
-            datos.add(alumno.getPoblacion());
-            datos.add("PROVINCIA:");
-            datos.add(alumno.getCp()+" - "+alumno.getProvincia());
-            datos.add("TELEFONOS:");
-            datos.add(alumno.getTelefono().trim()+" / "+alumno.getMovil());
-            datos.add("FECHA NACIMIENTO:");
-            datos.add(Campos.fechaToString(alumno.getNacimiento()));
-            datos.add("CENTRO ESTUDIOS:");
-            datos.add(alumno.getCentro());
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("DOMICILIO:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getDomicilio(),"L",false));
+            datos.add(new CamposTablaPDF("POBLACION:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getPoblacion(),"L",false));
+            datos.add(new CamposTablaPDF("PROVINCIA:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getCp()+" - "+alumno.getProvincia(),"L",false));
+            datos.add(new CamposTablaPDF("TELEFONOS:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getTelefono().trim()+" / "+alumno.getMovil(),"L",false));
+            datos.add(new CamposTablaPDF("FECHA NACIMIENTO:","L",false));
+            datos.add(new CamposTablaPDF(Campos.fechaToString(alumno.getNacimiento()),"L",false));
+            datos.add(new CamposTablaPDF("CENTRO ESTUDIOS:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getCentro(),"L",false));
             documento.add(generaCuerpo1(datos));
             documento.add(generaCuerpo2Alumno(alumno));
             documento.add(generaCuerpo3Alumno(alumno));
@@ -140,21 +146,21 @@ public class MostrarPDF {
             contenidos[1]=profesor.getApellidos()+", "+profesor.getNombre();
             documento.add(generaCabeceraReferencia(referencias,contenidos,
                     profesor.getFoto()));
-            List<String> datos=new ArrayList<>();
-            datos.add("DOMICILIO:");
-            datos.add(profesor.getDomicilio());
-            datos.add("POBLACION:");
-            datos.add(profesor.getPoblacion());
-            datos.add("PROVINCIA:");
-            datos.add(profesor.getCp()+" - "+profesor.getProvincia());
-            datos.add("TELEFONOS:");
-            datos.add(profesor.getTelefono().trim()+" / "+profesor.getMovil());
-            datos.add("FECHA NACIMIENTO:");
-            datos.add(Campos.fechaToString(profesor.getFechaNacimiento()));
-            datos.add("CTA.BANCARIA:");
-            datos.add(profesor.getCtaBanco());
-            datos.add("EMAIL:");
-            datos.add(profesor.getEmail());
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("DOMICILIO:","L",false));
+            datos.add(new CamposTablaPDF(profesor.getDomicilio(),"L",false));
+            datos.add(new CamposTablaPDF("POBLACION:","L",false));
+            datos.add(new CamposTablaPDF(profesor.getPoblacion(),"L",false));
+            datos.add(new CamposTablaPDF("PROVINCIA:","L",false));
+            datos.add(new CamposTablaPDF(profesor.getCp()+" - "+profesor.getProvincia(),"L",false));
+            datos.add(new CamposTablaPDF("TELEFONOS:","L",false));
+            datos.add(new CamposTablaPDF(profesor.getTelefono().trim()+" / "+profesor.getMovil(),"L",false));
+            datos.add(new CamposTablaPDF("FECHA NACIMIENTO:","L",false));
+            datos.add(new CamposTablaPDF(Campos.fechaToString(profesor.getFechaNacimiento()),"L",false));
+            datos.add(new CamposTablaPDF("CTA.BANCARIA:","L",false));
+            datos.add(new CamposTablaPDF(profesor.getCtaBanco(),"L",false));
+            datos.add(new CamposTablaPDF("EMAIL:","L",false));
+            datos.add(new CamposTablaPDF(profesor.getEmail(),"L",false));
             documento.add(generaCuerpo1(datos));
             documento.close();
         } catch (DocumentException ex) {
@@ -171,21 +177,18 @@ public class MostrarPDF {
             float[] medidaCeldas = {1.00f, 5.00f,2.00f};
             documento.open();
             documento.add(generaCabecera("** ASIGNATURAS **"));
-            PdfPTable tabla=new PdfPTable(medidaCeldas.length);
-            tabla.setWidthPercentage(100.0f);
-            tabla.setWidths(medidaCeldas);
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("CLAVE","L",true));
+            datos.add(new CamposTablaPDF("ASIGNATURA","L",true));
+            datos.add(new CamposTablaPDF("HORAS","L",true));
             for (Asignatura a: asignaturasObsList){
-                String[] campos=new String[3];
-                campos[0]=a.getCodigo();
-                campos[1]=a.getNombre();
-                campos[2]=a.getCargaHoras()+" horas";
-                for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i]));
-                    tabla.addCell(celda);
-                }
+                datos.add(new CamposTablaPDF(a.getCodigo(),"L",false));
+                datos.add(new CamposTablaPDF(a.getNombre(),"L",false));
+                datos.add(new CamposTablaPDF(a.getCargaHoras()+" horas","R",false));
             }
-            documento.add(tabla);
+            documento.add(generaTabla(3, medidaCeldas , 4, 1, 12, datos, false));
+            
+
             documento.close();
         } catch (DocumentException ex) {
             Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Listado Asignaturas)");
@@ -209,8 +212,8 @@ public class MostrarPDF {
             documento.add(generaCabeceraReferencia(referencias,contenidos,
                     curso.getTutor().getFoto()));
             
-            List<String> datos=new ArrayList<>();
-            datos.add("IMPORTE/HORA:");
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("IMPORTE/HORA:","L",false));
             String tipoPago;
             switch(curso.getPago()){
                 case "A": tipoPago="Anual";
@@ -222,7 +225,7 @@ public class MostrarPDF {
                 default:  tipoPago="No definido";
                             break;
             }
-            datos.add(curso.getImporteHora()+" €  "+tipoPago);
+            datos.add(new CamposTablaPDF(curso.getImporteHora()+" €  "+tipoPago,"L",false));
             documento.add(generaCuerpo1(datos));
             PdfPTable tabla = new PdfPTable(2);
             tabla.setWidthPercentage(100.0f);
@@ -237,10 +240,10 @@ public class MostrarPDF {
             celdaDerecha.setHorizontalAlignment(Element.ALIGN_LEFT);
             tabla.setWidths(medidaCeldas); 
             celdaIzquierda.addElement(new Paragraph("ASIGNATURAS:"));
-            List<String> asignaturas=new ArrayList<>();
+            List<CamposTablaPDF> asignaturas=new ArrayList<>();
             for (Asignatura a: curso.getAsignaturas()){
-                asignaturas.add(a.getCodigo());
-                asignaturas.add(a.getNombre());
+                asignaturas.add(new CamposTablaPDF(a.getCodigo(),"L",false));
+                asignaturas.add(new CamposTablaPDF(a.getNombre(),"L",false));
             }
             celdaDerecha.addElement(generaTabla(2,medidaCeldas,1,0,12,asignaturas, false));
             tabla.addCell(celdaIzquierda);
@@ -261,21 +264,16 @@ public class MostrarPDF {
             float[] medidaCeldas = {2.00f, 3.30f, 4.70f};
             documento.open();
             documento.add(generaCabecera("** AULAS **"));
-            PdfPTable tabla=new PdfPTable(medidaCeldas.length);
-            tabla.setWidthPercentage(100.0f);
-            tabla.setWidths(medidaCeldas);
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("CLAVE","L",true));
+            datos.add(new CamposTablaPDF("AULA","L",true));
+            datos.add(new CamposTablaPDF("UBICACION","L",true));
             for (Aula a: aulas){
-                String[] campos=new String[3];
-                campos[0]=a.getCodigo();
-                campos[1]=a.getDescripcion();
-                campos[2]=a.getUbicacion();
-                for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i]));
-                    tabla.addCell(celda);
-                }
+                datos.add(new CamposTablaPDF(a.getCodigo(),"L",false));
+                datos.add(new CamposTablaPDF(a.getDescripcion(),"L",false));
+                datos.add(new CamposTablaPDF(a.getUbicacion(),"L",false));
             }
-            documento.add(tabla);
+            documento.add(generaTabla(3, medidaCeldas , 4, 1, 12, datos, false));
             documento.close();
         } catch (DocumentException ex) {
             Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Listado Aulas)");
@@ -293,33 +291,20 @@ public class MostrarPDF {
             float[] medidaCeldas = {0.65f, 1.60f, 1.60f, 1.40f, 1.60f};
             documento.open();
             documento.add(generaCabecera("** PROVEEDORES **"));
-            PdfPTable tabla=new PdfPTable(medidaCeldas.length);
-            tabla.setWidthPercentage(100.0f);
-            tabla.setWidths(medidaCeldas);
-            String[] campos=new String[5];
-            campos[0]="CIF/DNI";
-            campos[1]="NOMBRE";
-            campos[2]="TELEFONOS";
-            campos[3]="CTA.BANCO";
-            campos[4]="EMAIL";
-            for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i]));
-                    tabla.addCell(celda);
-            }
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("CIF/DNI","L",true));
+            datos.add(new CamposTablaPDF("NOMBRE","L",true));
+            datos.add(new CamposTablaPDF("TELEFONOS","L",true));
+            datos.add(new CamposTablaPDF("CTA.BANCO","L",true));
+            datos.add(new CamposTablaPDF("EMAIL","L",true));
             for (Proveedor proveedor: proveedores){
-                campos[0]=proveedor.getCifDni();
-                campos[1]=proveedor.getNombre()+" "+proveedor.getApellidos();
-                campos[2]=proveedor.getTelefono()+" - "+proveedor.getMovil();
-                campos[3]=proveedor.getCtaBanco();
-                campos[4]=proveedor.getEmail();
-                for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i]));
-                    tabla.addCell(celda);
-                }
+                datos.add(new CamposTablaPDF(proveedor.getCifDni(),"L",false));
+                datos.add(new CamposTablaPDF(proveedor.getNombre()+" "+proveedor.getApellidos(),"L",false));
+                datos.add(new CamposTablaPDF(proveedor.getTelefono()+" - "+proveedor.getMovil(),"R",false));
+                datos.add(new CamposTablaPDF(proveedor.getCtaBanco(),"R",false));
+                datos.add(new CamposTablaPDF(proveedor.getEmail(),"L",false));
             }
-            documento.add(tabla);
+            documento.add(generaTabla(5, medidaCeldas , 4, 1, 12, datos, false));
             documento.close();
         } catch (DocumentException ex) {
             Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Listado Horarios)");
@@ -340,19 +325,19 @@ public class MostrarPDF {
             contenidos[1]=matricula.getAlumno().getApellidos()+", "+matricula.getAlumno().getNombre();
             documento.add(generaCabeceraReferencia(referencias,contenidos,
                     matricula.getAlumno().getFoto()));
-            List<String> datos=new ArrayList<>();
-            datos.add("DOMICILIO:");
-            datos.add(matricula.getAlumno().getDomicilio());
-            datos.add("POBLACION:");
-            datos.add(matricula.getAlumno().getPoblacion());
-            datos.add("PROVINCIA:");
-            datos.add(matricula.getAlumno().getCp()+" - "+matricula.getAlumno().getProvincia());
-            datos.add("TELEFONOS:");
-            datos.add(matricula.getAlumno().getTelefono().trim()+" / "+matricula.getAlumno().getMovil());
-            datos.add("FECHA NACIMIENTO:");
-            datos.add(matricula.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            datos.add("CENTRO ESTUDIOS:");
-            datos.add(matricula.getAlumno().getCentro());
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("DOMICILIO:","L",false));
+            datos.add(new CamposTablaPDF(matricula.getAlumno().getDomicilio(),"L",false));
+            datos.add(new CamposTablaPDF("POBLACION:","L",false));
+            datos.add(new CamposTablaPDF(matricula.getAlumno().getPoblacion(),"L",false));
+            datos.add(new CamposTablaPDF("PROVINCIA:","L",false));
+            datos.add(new CamposTablaPDF(matricula.getAlumno().getCp()+" - "+matricula.getAlumno().getProvincia(),"L",false));
+            datos.add(new CamposTablaPDF("TELEFONOS:","L",false));
+            datos.add(new CamposTablaPDF(matricula.getAlumno().getTelefono().trim()+" / "+matricula.getAlumno().getMovil(),"L",false));
+            datos.add(new CamposTablaPDF("FECHA NACIMIENTO:","L",false));
+            datos.add(new CamposTablaPDF(matricula.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),"L",false));
+            datos.add(new CamposTablaPDF("CENTRO ESTUDIOS:","L",false));
+            datos.add(new CamposTablaPDF(matricula.getAlumno().getCentro(),"L",false));
             documento.add(generaCuerpo1(datos));
             documento.add(generaCuerpo2Alumno(matricula.getAlumno()));
             documento.add(generaCuerpo3Alumno(matricula.getAlumno()));
@@ -370,12 +355,12 @@ public class MostrarPDF {
             celdaDerecha.setHorizontalAlignment(Element.ALIGN_LEFT);
             tabla.setWidths(medidaCeldas1); 
             celdaIzquierda.addElement(new Paragraph("MATRICULACIONES:"));
-            List<String> matriculas=new ArrayList<>();
+            List<CamposTablaPDF> matriculas=new ArrayList<>();
             for (Matricula m: matricula.getListaMatriculas() ){
-                matriculas.add(m.getCodCurso());
-                matriculas.add(m.getDescripcionAsignatura());
-                matriculas.add(m.getFechaInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                matriculas.add(m.getFechaFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                matriculas.add(new CamposTablaPDF(m.getCodCurso(),"L",false));
+                matriculas.add(new CamposTablaPDF(m.getDescripcionAsignatura(),"L",false));
+                matriculas.add(new CamposTablaPDF(m.getFechaInicio().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),"L",false));
+                matriculas.add(new CamposTablaPDF(m.getFechaFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),"L",false));
             }
             celdaDerecha.addElement(generaTabla(4,medidaCeldas2,1,0,12,matriculas, true));
             tabla.addCell(celdaIzquierda);
@@ -405,37 +390,24 @@ public class MostrarPDF {
             Font fuente= new Font();
             fuente.setSize(8);
             float[] medidaCeldas = {1.20f, 4.30f, 1.20f, 3.30f, 2.20f, 2.20f};
-            PdfPTable tabla=new PdfPTable(medidaCeldas.length);
-            tabla.setWidthPercentage(100.0f);
-            tabla.setWidths(medidaCeldas);
-            String[] campos=new String[6];
-            campos[0]="CÓDIGO";
-            campos[1]="ASIGNATURA";
-            campos[2]="CÓDIGO";
-            campos[3]="AULA";
-            campos[4]="DIA";
-            campos[5]="HORAS";
-            for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i],fuente));
-                    tabla.addCell(celda);
-            }   
+            
+            
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("CÓDIGO","L",true));
+            datos.add(new CamposTablaPDF("ASIGNATURA","L",true));
+            datos.add(new CamposTablaPDF("CÓDIGO","L",true));
+            datos.add(new CamposTablaPDF("AULA","L",true));
+            datos.add(new CamposTablaPDF("DIA","L",true));
+            datos.add(new CamposTablaPDF("HORAS","L",true));
             for (Plan plan: fichaPlan.getListaPlanes()){
-                campos[0]=plan.getCodigoAsignatura();
-                campos[1]=plan.getDescripcionAsignatura();
-                campos[2]=plan.getCodigoAula();
-                campos[3]=plan.getDescripcionAula();
-                campos[4]=plan.getDiaSemanaSpanish();
-                campos[5]=plan.getDeHora()+" - "+plan.getAHora();
-                
-                
-                for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i],fuente));
-                    tabla.addCell(celda);
-                }
+                datos.add(new CamposTablaPDF(plan.getCodigoAsignatura(),"L",false));
+                datos.add(new CamposTablaPDF(plan.getDescripcionAsignatura(),"L",false));
+                datos.add(new CamposTablaPDF(plan.getCodigoAula(),"L",false));
+                datos.add(new CamposTablaPDF(plan.getDescripcionAula(),"L",false));
+                datos.add(new CamposTablaPDF(plan.getDiaSemanaSpanish(),"L",false));
+                datos.add(new CamposTablaPDF(plan.getDeHora()+" - "+plan.getAHora(),"L",false));
             }
-            documento.add(tabla);
+            documento.add(generaTabla(6, medidaCeldas , 4, 1, 8, datos, false));
             documento.close();
         } catch (DocumentException ex) {
             Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Ficha Profesor)");
@@ -460,47 +432,34 @@ public class MostrarPDF {
             contenidos[1]=ficha.getAlumno().getApellidos()+", "+ficha.getAlumno().getNombre();
             documento.add(generaCabeceraReferencia(referencias,contenidos,
                     ficha.getAlumno().getFoto()));
-            List<String> datos=new ArrayList<>();
-            datos.add("DOMICILIO:");
-            datos.add(ficha.getAlumno().getDomicilio());
-            datos.add("POBLACION:");
-            datos.add(ficha.getAlumno().getPoblacion());
-            datos.add("PROVINCIA:");
-            datos.add(ficha.getAlumno().getCp()+" - "+ficha.getAlumno().getProvincia());
-            datos.add("TELEFONOS:");
-            datos.add(ficha.getAlumno().getTelefono().trim()+" / "+ficha.getAlumno().getMovil());
-            datos.add("FECHA NACIMIENTO:");
-            datos.add(ficha.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-            datos.add("CENTRO ESTUDIOS:");
-            datos.add(ficha.getAlumno().getCentro());
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("DOMICILIO:","L",false));
+            datos.add(new CamposTablaPDF(ficha.getAlumno().getDomicilio(),"L",false));
+            datos.add(new CamposTablaPDF("POBLACION:","L",false));
+            datos.add(new CamposTablaPDF(ficha.getAlumno().getPoblacion(),"L",false));
+            datos.add(new CamposTablaPDF("PROVINCIA:","L",false));
+            datos.add(new CamposTablaPDF(ficha.getAlumno().getCp()+" - "+ficha.getAlumno().getProvincia(),"L",false));
+            datos.add(new CamposTablaPDF("TELEFONOS:","L",false));
+            datos.add(new CamposTablaPDF(ficha.getAlumno().getTelefono().trim()+" / "+ficha.getAlumno().getMovil(),"L",false));
+            datos.add(new CamposTablaPDF("FECHA NACIMIENTO:","L",false));
+            datos.add(new CamposTablaPDF(ficha.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),"L",false));
+            datos.add(new CamposTablaPDF("CENTRO ESTUDIOS:","L",false));
+            datos.add(new CamposTablaPDF(ficha.getAlumno().getCentro(),"L",false));
             documento.add(generaCuerpo1(datos));
             documento.add(new Paragraph(" "));
             float[] medidaCeldas = {1.20f, 3.00f, 1.20f, 1.20f};
-            PdfPTable tabla=new PdfPTable(medidaCeldas.length);
-            tabla.setWidthPercentage(100.0f);
-            tabla.setWidths(medidaCeldas);
-            String[] campos=new String[4];
-            campos[0]="CÓDIGO";
-            campos[1]="ASIGNATURA";
-            campos[2]="FECHA";
-            campos[3]="NOTA";
-            for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i]));
-                    tabla.addCell(celda);
-            }   
+            datos.clear();
+            datos.add(new CamposTablaPDF("CÓDIGO","L",true));
+            datos.add(new CamposTablaPDF("ASIGNATURA","L",true));
+            datos.add(new CamposTablaPDF("FECHA","L",true));
+            datos.add(new CamposTablaPDF("NOTA","L",true));
             for (Examen examen: ficha.getListaExamenes()){
-                campos[0]=examen.getCodigoAsignatura();
-                campos[1]=examen.getDescripcionAsignatura();
-                campos[2]=examen.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                campos[3]=String.format("%.2f",examen.getNota());
-                for (int i=0; i<medidaCeldas.length; i++){
-                    PdfPCell celda = new PdfPCell();
-                    celda.addElement(new Paragraph(campos[i]));
-                    tabla.addCell(celda);
-                }
+                datos.add(new CamposTablaPDF(examen.getCodigoAsignatura(),"L",false));
+                datos.add(new CamposTablaPDF(examen.getDescripcionAsignatura(),"L",false));
+                datos.add(new CamposTablaPDF(examen.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),"R",false));
+                datos.add(new CamposTablaPDF(String.format("%.2f",examen.getNota()),"R",false));
             }
-            documento.add(tabla);
+            documento.add(generaTabla(4, medidaCeldas , 4, 1, 12, datos, false));
             documento.close();
             
             } catch (DocumentException ex) {
@@ -516,11 +475,11 @@ public class MostrarPDF {
         try{
             documento.open();
             documento.add(generaCabecera("GASTOS PROVEEDOR"));
-            List<String> datos=new ArrayList<>();
-            datos.add("NIF:");
-            datos.add(proveedor.getProveedor().getCifDni());
-            datos.add("NOMBRE:");
-            datos.add(proveedor.getProveedor().getNombre()+" "+proveedor.getProveedor().getApellidos());
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("NIF:","L",false));
+            datos.add(new CamposTablaPDF(proveedor.getProveedor().getCifDni(),"L",false));
+            datos.add(new CamposTablaPDF("NOMBRE:","L",false));
+            datos.add(new CamposTablaPDF(proveedor.getProveedor().getNombre()+" "+proveedor.getProveedor().getApellidos(),"L",false));
             documento.add(generaCuerpo1(datos));
             documento.add(new Paragraph(" "));
             PdfPTable tabla = new PdfPTable(2);
@@ -537,25 +496,26 @@ public class MostrarPDF {
             celdaDerecha.setHorizontalAlignment(Element.ALIGN_LEFT);
             tabla.setWidths(medidaCeldas1); 
             celdaIzquierda.addElement(new Paragraph("RECIBOS:"));
-            List<String> gastos=new ArrayList<>();
-            gastos.add("CONCEPTO");
-            gastos.add("FECHA");
-            gastos.add("IMPORTE");
-            gastos.add("IVA");
+            List<CamposTablaPDF> gastos=new ArrayList<>();
+            gastos.add(new CamposTablaPDF("CONCEPTO","L",true));
+            gastos.add(new CamposTablaPDF("FECHA","L",true));
+            gastos.add(new CamposTablaPDF("IMPORTE","L",true));
+            gastos.add(new CamposTablaPDF(ShareData.EMPRESA.getImpuesto(),"L",true));
             Double total=0.0;
             Double iva=0.0;
             for (Gasto g: proveedor.getListaGastos() ){
-                gastos.add(g.getConcepto());
-                gastos.add(Campos.fechaToString(g.getFecha()));
-                gastos.add(String.format("%10.2f",g.getBase()));
-                gastos.add(String.format("%10.2f",g.getIva()));
+                gastos.add(new CamposTablaPDF(g.getConcepto(),"L",false));
+                gastos.add(new CamposTablaPDF(Campos.fechaToString(g.getFecha()),"L",false));
+                gastos.add(new CamposTablaPDF(String.format("%10.2f",g.getBase()),"R",false));
+                gastos.add(new CamposTablaPDF(String.format("%10.2f",g.getIva()),"R",false));
                 total=total+g.getBase();
                 iva=iva+g.getIva();
             }
-            gastos.add("TOTAL:");
-            gastos.add("");
-            gastos.add(String.format("%10.2f",total));
-            gastos.add(String.format("%10.2f",iva));
+            
+            gastos.add(new CamposTablaPDF("","L",false));
+            gastos.add(new CamposTablaPDF("TOTAL:","L",false));
+            gastos.add(new CamposTablaPDF(String.format("%10.2f",total),"R",false));
+            gastos.add(new CamposTablaPDF(String.format("%10.2f",iva),"R",false));
                                 
             celdaDerecha.addElement(generaTabla(4,medidaCeldas2,1,0,12,gastos, false));
             tabla.addCell(celdaIzquierda);
@@ -599,12 +559,12 @@ public class MostrarPDF {
             celdaDatosEmpresa.setPadding(0); 
             celdaDatosEmpresa.setBorder(0);
             celdaDatosEmpresa.setHorizontalAlignment(Element.ALIGN_LEFT);
-            List<String> datos=new ArrayList<>();
-            datos.add(ShareData.EMPRESA.getNombre());
-            datos.add(ShareData.EMPRESA.getDomicilio());
-            datos.add(ShareData.EMPRESA.getPoblacion());
-            datos.add(ShareData.EMPRESA.getCp()+" - "+ShareData.EMPRESA.getProvincia());
-            datos.add(ShareData.EMPRESA.getTelefono());
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF(ShareData.EMPRESA.getNombre(),"L",false));
+            datos.add(new CamposTablaPDF(ShareData.EMPRESA.getDomicilio(),"L",false));
+            datos.add(new CamposTablaPDF(ShareData.EMPRESA.getPoblacion(),"L",false));
+            datos.add(new CamposTablaPDF(ShareData.EMPRESA.getCp()+" - "+ShareData.EMPRESA.getProvincia(),"L",false));
+            datos.add(new CamposTablaPDF(ShareData.EMPRESA.getTelefono(),"L",false));
             float[] medidaCeldasEmpresa = {2.00f};
             PdfPTable bloqueDatosEmpresa = generaTabla(1,medidaCeldasEmpresa,1,0,8,datos, false);
             celdaDatosEmpresa.addElement(bloqueDatosEmpresa); 
@@ -647,10 +607,10 @@ public class MostrarPDF {
             celdaDatosAlumno.setPadding(0); 
             celdaDatosAlumno.setBorder(0);
             celdaDatosAlumno.setHorizontalAlignment(Element.ALIGN_LEFT);
-            List<String> datos=new ArrayList<>();
+            List<CamposTablaPDF> datos=new ArrayList<>();
             for (int i=0; i<referencias.length;i++){
-                datos.add(referencias[i]);
-                datos.add(contenidos[i]);
+                datos.add(new CamposTablaPDF(referencias[i],"L",false));
+                datos.add(new CamposTablaPDF(contenidos[i],"L",false));
             }
             float[] medidaCeldasEmpresa = {3.31f,6.49f};
             PdfPTable bloqueCabeceraAlumno = generaTabla(2,medidaCeldasEmpresa,1,0,12,datos, false);
@@ -679,7 +639,7 @@ public class MostrarPDF {
      * @param datos Lista de datos a visualizar
      * @return      Devuelve la tabla generada
      */
-    private PdfPTable generaCuerpo1(List<String> datos) {
+    private PdfPTable generaCuerpo1(List<CamposTablaPDF> datos) {
         float[] medidaCeldas = {2.70f, 7.30f};
         PdfPTable bloqueDatos = generaTabla(2,medidaCeldas,1,0,12,datos, false);
         return bloqueDatos;
@@ -713,27 +673,27 @@ public class MostrarPDF {
         try {
             tabla.setWidths(medidaCeldas); 
             celdaIzquierdaSup.addElement(new Paragraph("PADRE:"));
-            List<String> datos=new ArrayList<>();
-            datos.add("DNI:");
-            datos.add(alumno.getDniPadre());
-            datos.add("NOMBRE:");
-            datos.add(alumno.getPadre());
-            datos.add("TELEFONO:");
-            datos.add(alumno.getTelefonoPadre());
-            datos.add("EMAIL:");
-            datos.add(alumno.getEmailPadre());
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("DNI:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getDniPadre(),"L",false));
+            datos.add(new CamposTablaPDF("NOMBRE:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getPadre(),"L",false));
+            datos.add(new CamposTablaPDF("TELEFONO:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getTelefonoPadre(),"L",false));
+            datos.add(new CamposTablaPDF("EMAIL:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getEmailPadre(),"L",false));
             PdfPTable bloqueDatosPadre = generaTabla(2,medidaCeldas,1,0,12,datos, false);
             celdaDerechaSup.addElement(bloqueDatosPadre);
             celdaIzquierdaInf.addElement(new Paragraph("MADRE:"));
             datos=new ArrayList<>();
-            datos.add("DNI:");
-            datos.add(alumno.getDniMadre());
-            datos.add("NOMBRE:");
-            datos.add(alumno.getMadre());
-            datos.add("TELEFONO:");
-            datos.add(alumno.getTelefonoMadre());
-            datos.add("EMAIL:");
-            datos.add(alumno.getEmailMadre());
+            datos.add(new CamposTablaPDF("DNI:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getDniMadre(),"L",false));
+            datos.add(new CamposTablaPDF("NOMBRE:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getMadre(),"L",false));
+            datos.add(new CamposTablaPDF("TELEFONO:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getTelefonoMadre(),"L",false));
+            datos.add(new CamposTablaPDF("EMAIL:","L",false));
+            datos.add(new CamposTablaPDF(alumno.getEmailMadre(),"L",false));
             PdfPTable bloqueDatosMadre = generaTabla(2,medidaCeldas,1,0,12,datos, false);
             celdaDerechaInf.addElement(bloqueDatosMadre);
         } catch (DocumentException ex) {
@@ -752,9 +712,9 @@ public class MostrarPDF {
      * @return          Devuelve la tabla generada
      */
     private PdfPTable generaCuerpo3Alumno(Alumno alumno) {
-        List<String> datos=new ArrayList<>();
-        datos.add("OBSERVACIONES:");
-        datos.add(alumno.getObservaciones());
+        List<CamposTablaPDF> datos=new ArrayList<>();
+        datos.add(new CamposTablaPDF("OBSERVACIONES:","L",false));
+        datos.add(new CamposTablaPDF(alumno.getObservaciones(),"L",false));
         float[] medidaCeldas = {2.70f, 7.30f};
         PdfPTable bloqueDatosAlumno = generaTabla(2,medidaCeldas,1,0,12,datos, false);
         return bloqueDatosAlumno;
@@ -770,7 +730,7 @@ public class MostrarPDF {
      * @param datos         Datos a visualizar
      * @return              Devuelve la tabla generada
      */
-    private PdfPTable generaTabla(int columnas, float[] sizeColumnas, int padding, int bordes, int sizeFuente, List<String> datos, boolean bordesTabla) {
+    private PdfPTable generaTabla(int columnas, float[] sizeColumnas, int padding, int bordes, int sizeFuente, List<CamposTablaPDF> datos, boolean bordesTabla) {
         Font fuente= new Font();
         fuente.setSize(sizeFuente);
         PdfPTable tabla=new PdfPTable(columnas);
@@ -780,7 +740,7 @@ public class MostrarPDF {
             tabla.setWidths(sizeColumnas);
             int numeroColumna=1;
             int filas=1;
-            for (String s: datos){
+            for (CamposTablaPDF s: datos){
                 PdfPCell celda = new PdfPCell();
                 celda.setBorderWidth(bordes);
                 if (bordesTabla){
@@ -797,15 +757,31 @@ public class MostrarPDF {
                         celda.setBorderWidthRight  (1f);
                     } 
                 }
+                
+                
+                
+                if (s.isSombreado()) celda.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                
+                
+                
                 //celda.setPadding(padding);
                 celda.setPaddingLeft(padding);
                 celda.setPaddingRight(padding);
+                celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                
+                Paragraph p=new Paragraph(s.getCadena(),fuente);
                 if (filas==filasTotales){
                     celda.setPaddingBottom(padding);
                 }
+                if (s.getAlineamiento().equals("L")){
+                    p.setAlignment(Element.ALIGN_LEFT);
+                }else if (s.getAlineamiento().equals("R")){
+                    p.setAlignment(Element.ALIGN_RIGHT);
+                }else{
+                    p.setAlignment(Element.ALIGN_CENTER);
+                }
                 
-                celda.setHorizontalAlignment(Element.ALIGN_LEFT);
-                celda.addElement(new Paragraph(s,fuente));
+                celda.addElement(p);
                 tabla.addCell(celda);
                 numeroColumna++;
                 if (numeroColumna>columnas){
@@ -824,73 +800,337 @@ public class MostrarPDF {
             documento.open();
             documento.add(generaCabecera(null));
             float[] medidaSubCabecera={0.80f,1.00f,0.80f,1.00f};
-            List<String> datos=new ArrayList<>();
-            datos.add("Recibo:");
-            datos.add(String.format("%07d", recibo.getRecibo()));
-            datos.add("Fecha:");
-            datos.add(Campos.fechaToString(recibo.getFechaEmision()));
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("Recibo:","L",false));
+            datos.add(new CamposTablaPDF(String.format("%07d", recibo.getRecibo()),"L",false));
+            datos.add(new CamposTablaPDF("Fecha:","L",false));
+            datos.add(new CamposTablaPDF(Campos.fechaToString(recibo.getFechaEmision()),"L",false));
             documento.add(generaTabla(4, medidaSubCabecera, 3, 0, 12, datos, false));
             documento.add(new Paragraph(" "));
-            float[] medidas={1.00f};
+            float[] medidas={1.00f,3.70f};
+            float[] medidaFirma={1.00f};
             datos.clear();
-            datos.add("Nombre: "+datosAlumnoSeleccionado.getAlumno().getNombre()+
-                    " "+datosAlumnoSeleccionado.getAlumno().getApellidos()+"\n"+
-            "Domicilio: "+datosAlumnoSeleccionado.getAlumno().getDomicilio()+"\n"+
-            "Población: "+datosAlumnoSeleccionado.getAlumno().getPoblacion()+"\n"+
-            "Provincia: "+datosAlumnoSeleccionado.getAlumno().getCp()+" - "+
-                    datosAlumnoSeleccionado.getAlumno().getProvincia());
-            documento.add(generaTabla(1, medidas , 4, 0, 12, datos, true));
+            datos.add(new CamposTablaPDF("Nombre:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getNombre()+
+                    " "+datosAlumnoSeleccionado.getAlumno().getApellidos(),"L",false));
+            datos.add(new CamposTablaPDF("Domicilio:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getDomicilio(),"L",false));
+            datos.add(new CamposTablaPDF("Población:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getPoblacion(),"L",false));
+            datos.add(new CamposTablaPDF("Provincia:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getCp()+" - "+
+                    datosAlumnoSeleccionado.getAlumno().getProvincia(),"L",false));
+            documento.add(generaTabla(2, medidas , 4, 0, 12, datos, true));
             documento.add(new Paragraph(" "));
-            float[] medidaCeldas = {4.00f, 1.00f};
-            PdfPTable tabla=new PdfPTable(medidaCeldas.length);
-            tabla.setWidthPercentage(100.0f);
-            tabla.setWidths(medidaCeldas);
-            String[] campos=new String[6];
-            campos[0]="DESCRIPCION";
-            campos[1]="IMPORTE";
-            campos[2]=recibo.getDescripcion();
-            campos[3]=String.format("%.2f", recibo.getImporte());
-            
-            
-            PdfPCell columnHeader;
-            
-            for (int column = 0; column < 2; column++) {
-                columnHeader = new PdfPCell(new Phrase(campos[column]));
-                columnHeader.setHorizontalAlignment(Element.ALIGN_LEFT);
-                columnHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);  
-                columnHeader.setBorderWidth(0);
-                columnHeader.setPadding(1);
-                tabla.addCell(columnHeader);
-            }
-            tabla.setHeaderRows(1);
-            tabla.addCell(campos[2]);
-            PdfPCell celdaDinero=new PdfPCell();
-            
-            //celdaDinero.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            Paragraph preface = new Paragraph(campos[3]); 
-            preface.setAlignment(Element.ALIGN_RIGHT);
-            celdaDinero.addElement(preface);
-            celdaDinero.setVerticalAlignment(Element.ALIGN_CENTER);
-            tabla.addCell(celdaDinero);
-            documento.add(tabla);
-            documento.add(new Paragraph(" "));
-            documento.add(new Paragraph(" "));
+            float[] medidaTotales = {3.70f, 1.00f};
+            datos.clear();
+            datos.add(new CamposTablaPDF("DESCRIPCION","L",true));
+            datos.add(new CamposTablaPDF("IMPORTE","L",true));
+            documento.add(generaTabla(2, medidaTotales , 4, 1, 12, datos, false));
+            datos.clear();
+            datos.add(new CamposTablaPDF(recibo.getDescripcion(),"L",false));
+            datos.add(new CamposTablaPDF(recibo.getImporteFormateado(),"R",false));
+            documento.add(generaTabla(2, medidaTotales , 4, 1, 12, datos, false));
             documento.add(new Paragraph(" "));
             datos.clear();
-            datos.add("Firma/Sello:");
-            datos.add(" ");
-            datos.add(" ");
-            datos.add(" ");
-            datos.add(" ");
-            documento.add(generaTabla(1, medidas , 4, 0, 12, datos, true));
+            datos.add(new CamposTablaPDF("Firma/Sello:","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            documento.add(generaTabla(1, medidaFirma , 4, 0, 12, datos, true));
+            documento.close();
             documento.close();
         } catch (DocumentException ex) {
             Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Listado Asignaturas)");
         }
     }
+    
+    public void GenerarHojaFactura(Factura factura, FichaFactura datosAlumnoSeleccionado) {
+        try {
+            documento.open();
+            documento.add(generaCabecera(null));
+            float[] medidaSubCabecera={0.80f,1.00f,0.80f,1.00f};
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("Factura:","L",false));
+            datos.add(new CamposTablaPDF(factura.getFacturaFormateada(),"L",false));
+            datos.add(new CamposTablaPDF("Fecha:","L",false));
+            datos.add(new CamposTablaPDF(Campos.fechaToString(factura.getFechaFactura()),"L",false));
+            documento.add(generaTabla(4, medidaSubCabecera, 3, 0, 12, datos, false));
+            documento.add(new Paragraph(" "));
+            float[] medidas={0.80f,3.70f};
+            float[] medidaFirma={1.00f};
+            datos.clear();
+            datos.add(new CamposTablaPDF("Nombre:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getNombre()+
+                    " "+datosAlumnoSeleccionado.getAlumno().getApellidos(),"L",false));
+            datos.add(new CamposTablaPDF("Domicilio:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getDomicilio(),"L",false));
+            datos.add(new CamposTablaPDF("Población:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getPoblacion(),"L",false));
+            datos.add(new CamposTablaPDF("Provincia:","L",true));
+            datos.add(new CamposTablaPDF(datosAlumnoSeleccionado.getAlumno().getCp()+" - "+
+                    datosAlumnoSeleccionado.getAlumno().getProvincia(),"L",false));
+            documento.add(generaTabla(2, medidas , 4, 0, 12, datos, true));
+            documento.add(new Paragraph(" "));
+            float[] medidaCeldas = {3.70f, 1.00f};
+            List<ReciboGenerado> listaRecibos=factura.getRecibos();
+            float[] medidaTotales = {3.70f, 1.00f};
+            datos.clear();
+            datos.add(new CamposTablaPDF("DESCRIPCION","L",true));
+            datos.add(new CamposTablaPDF("IMPORTE","L",true));
+            documento.add(generaTabla(2, medidaTotales , 4, 1, 12, datos, false));
+           
+            datos.clear();
+            for (ReciboGenerado recibo: listaRecibos){
+                datos.add(new CamposTablaPDF(recibo.getDescripcion(),"L",false));
+                datos.add(new CamposTablaPDF(recibo.getImporteFormateado(),"R",false));
+            }
+            documento.add(generaTabla(2, medidaTotales , 4, 1, 12, datos, false));
+            
+           
+            Double baseImponible,iva,pago;
+            pago=factura.getImporteFactura();
+            baseImponible=(double)Math.round((pago*100/(100+ShareData.EMPRESA.getPorcentajeImpuesto()))*100d)/100d;
+            iva=pago-baseImponible;
+            datos.clear();
+            datos.add(new CamposTablaPDF("BASE IMPONIBLE:","L",false));
+            datos.add(new CamposTablaPDF(String.format("%.2f€", baseImponible),"R",false));
+            datos.add(new CamposTablaPDF(ShareData.EMPRESA.getImpuesto()+":","L",false));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",iva),"R",false));
+            datos.add(new CamposTablaPDF("TOTAL A PAGAR:","L",false));
+            datos.add(new CamposTablaPDF(factura.getImporteFormateado(),"R",false));
+            
+            documento.add(generaTabla(2, medidaTotales , 4, 0, 12, datos, true));
+            
+            documento.add(new Paragraph(" "));
+            datos.clear();
+            datos.add(new CamposTablaPDF("Firma/Sello:","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            datos.add(new CamposTablaPDF(" ","L",false));
+            documento.add(generaTabla(1, medidaFirma , 4, 0, 12, datos, true));
+            documento.close();
+        } catch (DocumentException ex) {
+            Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Listado Asignaturas)");
+        }    
+    
+    }
 
-  
+    public void GenerarHojaOcupacionAulas(List<OcupacionAula> ocupacionAulas) {
+        try{
+            documento.open();
+            documento.add(generaCabecera("* OCUPACIÓN AULAS *"));
+            documento.add(new Paragraph(" "));
+            Font fuente= new Font();
+            fuente.setSize(8);
+            float[] medidas = {1.20f, 3.30f, 2.20f, 2.30f, 3.20f, 2.20f};
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("CÓDIGO","L",true));
+            datos.add(new CamposTablaPDF("AULA","L",true));
+            datos.add(new CamposTablaPDF("DIA","L",true));
+            datos.add(new CamposTablaPDF("HORARIO","L",true));
+            datos.add(new CamposTablaPDF("PROFESOR","L",true));
+            datos.add(new CamposTablaPDF("ASIGNATURA","L",true));
+            documento.add(generaTabla(6, medidas , 4, 1, 8, datos, false));
+            datos.clear();
+            boolean inicio=true;
+            for (OcupacionAula ocupacion: ocupacionAulas){
+                datos.add(new CamposTablaPDF(ocupacion.getAula().getCodigo(),"L",false));
+                datos.add(new CamposTablaPDF(ocupacion.getAula().getDescripcion(),"L",false));
+                for (DiaOcupacion dia:ocupacion.getDiasOcupacion()){
+                    if (!inicio){
+                        datos.add(new CamposTablaPDF(" ","L",false));
+                        datos.add(new CamposTablaPDF(" ","L",false));
+                    }
+                    datos.add(new CamposTablaPDF(dia.getDiaSemanaSpanish(),"L",false));
+                    datos.add(new CamposTablaPDF(dia.getDeHora()+" - "+dia.getaHora(),"L",false));
+                    datos.add(new CamposTablaPDF(dia.getProfesor(),"L",false));
+                    datos.add(new CamposTablaPDF(dia.getAsignatura(),"L",false));
+                    inicio=false;
+                }
+                inicio=true;
+            }
+            documento.add(generaTabla(6, medidas , 4, 1, 8, datos, false));
+            documento.close();
+            documento.close();
+        } catch (DocumentException ex) {
+            Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Ficha Profesor)");
+        }
+    }
+
+    public void GenerarHojaRecibosPendientes(List<FichaRecibo> recibosPendientes) {
+        try{
+            documento.open();
+            documento.add(generaCabecera("RECIBOS PENDIENTES"));
+            documento.add(new Paragraph(" "));
+            float[] medidas = {2.80f, 1.20f, 1.20f, 3.80f, 1.20f};
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("ALUMNO","L",true));
+            datos.add(new CamposTablaPDF("RECIBO","L",true));
+            datos.add(new CamposTablaPDF("FECHA","L",true));
+            datos.add(new CamposTablaPDF("DESCRIPCION","L",true));
+            datos.add(new CamposTablaPDF("IMPORTE","L",true));
+            documento.add(generaTabla(5, medidas , 4, 1, 10, datos, false));
+            double total=0.0;
+            datos.clear();
+            for (FichaRecibo fichaRecibo: recibosPendientes){
+                datos.add(new CamposTablaPDF(fichaRecibo.getAlumno().getApellidos()+", "+fichaRecibo.getAlumno().getNombre(),"L",false));
+                for (ReciboGenerado recibo:fichaRecibo.getListaRecibos()){
+                    datos.add(new CamposTablaPDF(recibo.getReciboFormateado(),"L",false));
+                    datos.add(new CamposTablaPDF(recibo.getFechaEmisionFormateado(),"L",false));
+                    
+                    datos.add(new CamposTablaPDF(recibo.getDescripcion(),"L",false));
+                    datos.add(new CamposTablaPDF(recibo.getImporteFormateado(),"R",false));
+                    total=total+recibo.getImporte();
+                }
+            }
+            documento.add(generaTabla(5, medidas , 4, 1, 10, datos, false));
+
+            documento.add(new Paragraph(" "));
+            documento.add(new Paragraph(" "));
+            datos.clear();
+            datos.add(new CamposTablaPDF("","L",true));
+            datos.add(new CamposTablaPDF("","L",true));
+            datos.add(new CamposTablaPDF("","L",true));
+            datos.add(new CamposTablaPDF("TOTAL","L",true));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",total),"R",false));
+            documento.add(generaTabla(5, medidas , 4, 0, 10, datos, true));
+            documento.close();
+        } catch (DocumentException ex) {
+            Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Ficha Profesor)");
+        }
+    }
+
+    public void GenerarHojaBalance(List<Movimiento> listaMovimientos,LocalDate inicio, LocalDate fin) {
+        try{
+            documento.open();
+            documento.add(generaCabecera("** BALANCE **"));
+            documento.add(new Paragraph("Del: "+Campos.fechaToString(inicio)+
+                    "  al: "+Campos.fechaToString(fin)));
+            documento.add(new Paragraph(" "));
+            double ingresos=0.0;
+            double gastos=0.0;
+            String gasto,ingreso;
+            float[] medidas = {1.20f, 3.00f, 3.30f, 1.10f, 1.10f};
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("FECHA","L",true));
+            datos.add(new CamposTablaPDF("CLIENTE/PROVEEDOR","L",true));
+            datos.add(new CamposTablaPDF("CONCEPTO","L",true));
+            datos.add(new CamposTablaPDF("GASTO","L",true));
+            datos.add(new CamposTablaPDF("INGRESO","L",true));
+            documento.add(generaTabla(5, medidas , 4, 1, 9, datos, false));
+            datos.clear();
+            for (Movimiento mov: listaMovimientos){
+                if (mov.getTipo().equals("G")){
+                    gasto=mov.getImporteFormateado();
+                    ingreso="";
+                    gastos=gastos+(mov.getBaseImponible()+mov.getIva());
+                }else{
+                    ingreso=mov.getImporteFormateado();
+                    gasto="";
+                    ingresos=ingresos+(mov.getBaseImponible()+mov.getIva());
+                }  
+                datos.add(new CamposTablaPDF(mov.getFechaFormateado(),"L",false));
+                datos.add(new CamposTablaPDF(mov.getClienteProveedor(),"L",false));
+                datos.add(new CamposTablaPDF(mov.getConcepto(),"L",false));
+                datos.add(new CamposTablaPDF(gasto,"R",false));
+                datos.add(new CamposTablaPDF(ingreso,"R",false));
+            }
+            documento.add(generaTabla(5, medidas , 4, 1, 9, datos, false));
+            datos.clear();
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",gastos),"R",false));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",ingresos),"R",false));
+            documento.add(generaTabla(5, medidas , 4, 0, 9, datos, true));
+            datos.clear();
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF("TOTAL:","L",true));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",ingresos-gastos),"R",true));
+            documento.add(generaTabla(5, medidas , 4, 0, 9, datos, true));
+            documento.close();
+            
+        } catch (DocumentException ex) {
+            Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Ficha Profesor)");
+        }
+    }
+
+    public void GenerarHojaIva(List<Movimiento> listaMovimientos,LocalDate inicio, LocalDate fin) {
+        try{
+            documento.open();
+            documento.add(generaCabecera("** IVA **"));
+             documento.add(new Paragraph("Del: "+Campos.fechaToString(inicio)+
+                    "  al: "+Campos.fechaToString(fin)));
+            documento.add(new Paragraph(" "));double ingresos=0.0;
+            double ingresosIva=0.0;
+            double gastos=0.0;
+            double gastosIva=0.0;
+            String gasto,ingreso,gastoIva,ingresoIva;
+            float[] medidas = {1.20f, 3.00f, 3.30f, 1.10f, 1.10f, 1.10f, 1.10f};
+            List<CamposTablaPDF> datos=new ArrayList<>();
+            datos.add(new CamposTablaPDF("","L",true));
+            datos.add(new CamposTablaPDF("","L",true));
+            datos.add(new CamposTablaPDF("","L",true));
+            datos.add(new CamposTablaPDF("GASTO","C",true));
+            datos.add(new CamposTablaPDF("GASTO","C",true));
+            datos.add(new CamposTablaPDF("INGRESO","C",true));
+            datos.add(new CamposTablaPDF("INGRESO","C",true));
+            documento.add(generaTabla(7, medidas , 4, 0, 8, datos, true));
+            datos.clear();
+            datos.add(new CamposTablaPDF("FECHA","L",true));
+            datos.add(new CamposTablaPDF("CLIENTE/PROVEEDOR","L",true));
+            datos.add(new CamposTablaPDF("CONCEPTO","L",true));
+            datos.add(new CamposTablaPDF("BASE","L",true));
+            datos.add(new CamposTablaPDF("IVA","L",true));
+            datos.add(new CamposTablaPDF("BASE","L",true));
+            datos.add(new CamposTablaPDF("IVA","L",true));
+            documento.add(generaTabla(7, medidas , 4, 1, 8, datos, false));
+            datos.clear();
+            for (Movimiento mov: listaMovimientos){
+                if (mov.getTipo().equals("G")){
+                    gasto=mov.getBaseImpobibleFormateado();
+                    gastoIva=mov.getIvaFormateado();
+                    ingreso="";
+                    ingresoIva="";
+                    gastos=gastos+mov.getBaseImponible();
+                    gastosIva=gastosIva+mov.getIva();
+                }else{
+                    ingreso=mov.getBaseImpobibleFormateado();
+                    ingresoIva=mov.getIvaFormateado();
+                    gasto="";
+                    gastoIva="";
+                    ingresos=ingresos+mov.getBaseImponible();
+                    ingresosIva=ingresosIva+mov.getIva();
+                }  
+                datos.add(new CamposTablaPDF(mov.getFechaFormateado(),"L",false));
+                datos.add(new CamposTablaPDF(mov.getClienteProveedor(),"L",false));
+                datos.add(new CamposTablaPDF(mov.getConcepto(),"L",false));
+                datos.add(new CamposTablaPDF(gasto,"R",false));
+                datos.add(new CamposTablaPDF(gastoIva,"R",false));
+                datos.add(new CamposTablaPDF(ingreso,"R",false));
+                datos.add(new CamposTablaPDF(ingresoIva,"R",false));
+            }
+            documento.add(generaTabla(7, medidas , 4, 1, 8, datos, false));
+            datos.clear();
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF("","L",false));
+            datos.add(new CamposTablaPDF("TOTALES","L",true));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",gastos),"R",false));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",gastosIva),"R",false));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",ingresos),"R",false));
+            datos.add(new CamposTablaPDF(String.format("%.2f€",ingresosIva),"R",false));
+            documento.add(generaTabla(7, medidas , 4, 0, 8, datos, true));
+            documento.close();
+            
+        } catch (DocumentException ex) {
+            Mensajes.msgError("ERROR PDF", "Error generando documento PDF (Ficha Profesor)");
+        }}
 
     
-    
+ 
 }

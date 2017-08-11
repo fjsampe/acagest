@@ -136,7 +136,7 @@ public class FXMLProveedoresController implements Initializable {
     private void clickDeleteBtn(ActionEvent event) {
         if (proveedoresListView.getSelectionModel().getSelectedIndex()>-1){
             Proveedor proveedor=proveedoresListView.getSelectionModel().getSelectedItem();
-            if (Mensajes.msgPregunta(proveedor.getNombre()+" "+proveedor.getApellidos()+" será borrado.")) {
+            if (Mensajes.msgPregunta("Borrado elemento",proveedor.getNombre()+" "+proveedor.getApellidos()+" será borrado.","¿Quieres borrar el elemento?")) {
                 if (OperativasBD.borrarProveedor(proveedor)){
                     Mensajes.msgInfo("ACCION:", "El borrado del Proveedor ha sido realizado");
                     proveedoresObsList.remove(proveedor);

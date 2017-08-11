@@ -45,6 +45,7 @@ public class FXMLPrincipalController implements Initializable {
     @FXML private Button gastosBtn;
     @FXML private Button recibosBtn;
     @FXML private Button utilidadesBtn;
+    @FXML private Button facturasBtn;
 
     /**
      * Initializes the controller class.
@@ -187,6 +188,12 @@ public class FXMLPrincipalController implements Initializable {
         cargadorPantallas.cargarPantalla("resources/fxml/FXMLUtilidades.fxml", "Gastos", new Stage(),"/capaPresentacion/resources/icons/utilidades.png",true);
     }
     
+    
+    @FXML
+    private void clickFacturasBtn(ActionEvent event) {
+        cargadorPantallas.cargarPantalla("resources/fxml/FXMLFacturas.fxml", "Facturas", new Stage(),"/capaPresentacion/resources/icons/facturacion.png",true);
+    }
+    
     /**
      * Método que coloca las imágenes en los botones correspondientes
      */
@@ -198,9 +205,10 @@ public class FXMLPrincipalController implements Initializable {
             "resources/icons/proveedores.png","resources/icons/matricular.png",
             "resources/icons/planificador.png","resources/icons/examinar.png",
             "resources/icons/acerca.png","resources/icons/gastos.png",
-             "resources/icons/recibos.png","resources/icons/utilidades.png"
+            "resources/icons/recibos.png","resources/icons/utilidades.png",
+            "resources/icons/facturacion.png"
             };
-        ImageView[] iv=new ImageView[15];
+        ImageView[] iv=new ImageView[16];
         for (int i=0; i<icons.length; i++){
             iv[i]=new ImageView();
             iv[i].setImage(new Image(getClass().getResource(icons[i]).toExternalForm()));
@@ -250,6 +258,9 @@ public class FXMLPrincipalController implements Initializable {
         utilidadesBtn.setText("Utilidades");
         utilidadesBtn.setGraphic(iv[14]);
         utilidadesBtn.setContentDisplay(ContentDisplay.TOP);
+        facturasBtn.setText("Facturación");
+        facturasBtn.setGraphic(iv[15]);
+        facturasBtn.setContentDisplay(ContentDisplay.TOP);
         
         
         empresaLbl.setText(ShareData.EMPRESA.getNombre());
@@ -277,6 +288,7 @@ public class FXMLPrincipalController implements Initializable {
             default: break;
         }
     }
+
 
     
 

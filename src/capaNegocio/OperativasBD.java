@@ -6,6 +6,7 @@ import static capaDatos.Configuracion.obtenerParametrosConfig;
 import static capaDatos.Configuracion.validarParametrosAccesoBD;
 import capaPresentacion.resources.Campos;
 import capaPresentacion.resources.Mensajes;
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
@@ -180,7 +181,10 @@ public class OperativasBD {
                     empresa.setProvincia(resultado.getString(7)!=null?resultado.getString(7):"");
                     empresa.setTelefono(resultado.getString(8)!=null?resultado.getString(8):"");
                     empresa.setEmail(resultado.getString(9)!=null?resultado.getString(9):"");
-                    empresa.setLogo(resultado.getBytes(10));
+                    empresa.setImpuesto(resultado.getString(10)!=null?resultado.getString(10):"");
+                    empresa.setPorcentajeImpuesto(resultado.getDouble(11));
+                    empresa.setTutorPorCurso(resultado.getBoolean(12));
+                    empresa.setLogo(resultado.getBytes(13));
                 }
             } catch (SQLException ex) {
                 System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
@@ -199,12 +203,15 @@ public class OperativasBD {
         if (empresa.getLogo()!=null) cambiarImagen("UPDATE empresas SET Logo=? WHERE Codigo=1",ShareData.EMPRESA.getLogo());
         return ejecucionSentenciaDDL("UPDATE empresas SET Nifnie='"+empresa.getNif()+"',Nombre='"+
                     empresa.getNombre()+"',Domicilio='"+empresa.getDomicilio()+
-                    "',Poblacion='"+empresa.getPoblacion()+
-                    "',Cp='"+empresa.getCp()+
-                    "',Provincia='"+empresa.getProvincia()+
-                    "',Telefono='"+empresa.getTelefono()+
-                    "',Email='"+empresa.getEmail()+
-                    "' WHERE Codigo=1;")==1;
+                    "',Poblacion='"+empresa.getPoblacion()+"',"+
+                    "Cp='"+empresa.getCp()+"',"+
+                    "Provincia='"+empresa.getProvincia()+"',"+
+                    "Telefono='"+empresa.getTelefono()+"',"+
+                    "Email='"+empresa.getEmail()+"',"+
+                    "Impuesto='"+empresa.getImpuesto()+"',"+
+                    "Porcentaje="+empresa.getPorcentajeImpuesto()+","+
+                    "SoloUnTutor="+empresa.isTutorPorCurso()+" "+
+                    "WHERE Codigo=1;")==1;
     }
     
     /**
@@ -1304,6 +1311,641 @@ public class OperativasBD {
     }
 
    
+    public static List<Recibo> generarRecibos() {
+        /*select alumnos.codalumno,alumnos.nombre,alumnos.apellidos,cursos.codcurso,cursos.descripcion,cursos.pago,asignaturas.codasignatura,
+	cursos.importehora,asignaturas.cargahoras from matricular
+	left join alumnos on matricular.codAlumno=alumnos.codAlumno
+	left join cursos on matricular.codcurso=cursos.codcurso
+	left join asignaturas on matricular.codasignatura=asignaturas.codasignatura
+	where fechafin>=now() and fechainicio<=now();*/
+        List<Recibo> listaRecibos=null;
+        Alumno alumno=null;
+        Curso curso=null;
+        Asignatura asignatura=null;
+        List<Curso> listaCursos=null;
+        List<Asignatura> listaAsignaturas=null;
+        int codigoAlumnoActual=-1;
+        int codigoAlumnoInicial=-1;
+        String codigoCursoActual="";
+        String codigoCursoInicial="";
+        String asignaturaActual="";
+        String descripcion="";
+        String sentencia="";
+        String cadenaRecibosRepetidos="";
+        ResultSet resultado=null;
+        sentencia="select alumnos.codalumno,alumnos.nombre,alumnos.apellidos,"+
+                "cursos.codcurso,cursos.descripcion,cursos.pago,asignaturas.codasignatura,"+
+                "cursos.importehora,asignaturas.cargahoras from matricular " +
+                "left join alumnos on matricular.codAlumno=alumnos.codAlumno " +
+                "left join cursos on matricular.codcurso=cursos.codcurso " +
+                "left join asignaturas on matricular.codasignatura=asignaturas.codasignatura " +
+                "where fechafin>=now() and fechainicio<=now() "+
+                "order by alumnos.codalumno,cursos.codcurso, asignaturas.codasignatura;";
+        resultado=ejecucionSentenciaDML(sentencia);
+        try {
+            if (resultado.isBeforeFirst()){
+                // Creación de clases
+                listaRecibos=new ArrayList<>();
+                while(resultado.next()){
+                    codigoAlumnoActual=resultado.getInt(1);
+                    codigoCursoActual=resultado.getString(4);
+                    asignaturaActual=resultado.getString(7);
+                    
+                    if (codigoAlumnoInicial!=codigoAlumnoActual){
+                        if (codigoAlumnoInicial>-1){
+                            curso.setAsignaturas(listaAsignaturas);
+                            listaCursos.add(curso);
+                            Recibo recibo=new Recibo(alumno, listaCursos,LocalDate.now());
+                            listaRecibos.add(recibo);                            
+                            //Creo alumno nuevo, lista asignaturas y cursos
+                            alumno=new Alumno("", resultado.getString(2),resultado.getString(3),"","","","",null,
+                            "","","","","","","","","","","","",null);
+                            alumno.setCodigo(resultado.getInt(1));
+                            listaAsignaturas=new ArrayList<>();
+                            listaCursos=new ArrayList<>();
+                            curso=new Curso(resultado.getString(4),resultado.getString(5),
+                                resultado.getDouble(8),resultado.getString(6),null);
+                            
+                            
+                        }else{
+                            //Creo alumno nuevo, lista asignaturas y cursos
+                            //Recibo recibo=new Recibo(alumno, listaCursos,LocalDate.now(), null, anotaciones,0.0, 0.0);
+                            
+                            alumno=new Alumno("", resultado.getString(2),resultado.getString(3),"","","","",null,
+                            "","","","","","","","","","","","",null); 
+                            alumno.setCodigo(resultado.getInt(1));
+                            listaAsignaturas=new ArrayList<>();
+                            listaCursos=new ArrayList<>();
+                            curso=new Curso(resultado.getString(4),resultado.getString(5),
+                                resultado.getDouble(8),resultado.getString(6),null);
+                            
+                        }
+                    }else{
+                        if (!codigoCursoInicial.equals(codigoCursoActual)){
+                            curso.setAsignaturas(listaAsignaturas);
+                            listaCursos.add(curso);
+                            listaAsignaturas=new ArrayList<>();
+                            curso=new Curso(resultado.getString(4),resultado.getString(5),
+                                resultado.getDouble(8),resultado.getString(6),null);
+                        }
+                    }
+                    asignatura=new Asignatura(resultado.getString(7),"",resultado.getInt(9));
+                    listaAsignaturas.add(asignatura);
+                    codigoAlumnoInicial=codigoAlumnoActual;
+                    codigoCursoInicial=codigoCursoActual;
+                            
+                    
+                }
+                curso.setAsignaturas(listaAsignaturas);
+                listaCursos.add(curso);
+                Recibo recibo=new Recibo(alumno, listaCursos,LocalDate.now());
+                listaRecibos.add(recibo);
+                
+                
+                //Comprobamos que los recibos a generar no están duplicados.
+
+                for (Recibo r:listaRecibos){
+                    for (Iterator<Curso> iter = r.getCursos().listIterator(); iter.hasNext(); ) {
+                        Curso c = iter.next();
+                        switch(c.getPago()){
+                            case "A":   sentencia="select count(*) from recibos " +
+                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
+                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
+                                        "and codcurso='"+c.getCodigo()+"' "+
+                                        "and recibos.fechaemision>now()- interval '365 day';";
+                                        break;
+                            case "M":   sentencia="select count(*) from recibos " +
+                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
+                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
+                                        "and codcurso='"+c.getCodigo()+"' "+
+                                        "and recibos.fechaemision>now()- interval '1 month';";
+                                        break;
+                            case "S":   sentencia="select count(*) from recibos " +
+                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
+                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
+                                        "and codcurso='"+c.getCodigo()+"' "+
+                                        "and recibos.fechaemision>now()- interval '7 day';";
+                                        break;
+                        }
+                        
+                        
+                            resultado=ejecucionSentenciaDML(sentencia);
+                            if (resultado.next()){
+                                if(resultado.getInt(1)>0){
+                                    cadenaRecibosRepetidos=cadenaRecibosRepetidos+
+                                        "Para: "+r.getAlumno().getApellidos()+", "+r.getAlumno().getNombre()+"\n"+
+                                        "Curso: "+c.getDescripcion()+" con pago "+c.getPago()+"\n"+
+                                        "--------------------------------\n";
+                                    
+                                    iter.remove();
+                                }
+                            }
+                        
+                    }
+                }
+                if (cadenaRecibosRepetidos!="") Mensajes.msgInfo("RECIBOS DUPLICADOS",cadenaRecibosRepetidos);
+                
+                // Creo los recibos 
+                boolean estadoInsercion=false;
+                Double importeBase=0.0;
+                int ultimoId=0;
+                for (Recibo r:listaRecibos){
+                    importeBase=0.0;
+                    descripcion="";
+                    if (r.getCursos().size()>0){
+                        for (Curso c:r.getCursos()) {
+                            descripcion=descripcion+"Curso:"+c.getDescripcion()+" ";
+                            for (Asignatura a:c.getAsignaturas()){
+                                importeBase=importeBase+(a.getCargaHoras()*c.getImporteHora());
+                            }
+                        }
+                        sentencia="INSERT INTO recibos VALUES (default,'"+
+                            LocalDate.now()+"',null,'"+descripcion+
+                            "',"+importeBase+",null,"+r.getAlumno().getCodigo()+
+                            ") RETURNING numRecibo;";
+                        resultado=ejecucionSentenciaDML(sentencia); 
+                        ultimoId=extraerID(resultado);
+                        if (ultimoId>0) estadoInsercion=true; 
+                        for (Curso c: r.getCursos()){
+                            sentencia="INSERT INTO detallar VALUES ('"+c.getCodigo()+"',"+
+                                ultimoId+");";
+                            if (ejecucionSentenciaDDL(sentencia)==1 && estadoInsercion){
+                                estadoInsercion=true;
+                            }else{
+                                estadoInsercion=false; 
+                            }
+                            if (!estadoInsercion) Mensajes.msgError("INSERCION RECIBOS", "Algo ha fallado..");
+                        }
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+        }
+        return listaRecibos;
+    }
+
+    public static List<FichaRecibo> extraerFichasRecibos() {
+        int codigoActual=-1;
+        int codigoInicial=-1;
+        LocalDate fecha, fechaPago;
+        FichaRecibo ficha=null;
+        List<FichaRecibo> listaAlumnos=new ArrayList<>();
+        List<ReciboGenerado> listaPorAlumno = new ArrayList<>();
+        Alumno a=null;
+        ResultSet resultado=ejecucionSentenciaDML("select alumnos.CodAlumno,Nia,"+
+                "Nombre,Apellidos,Domicilio,Poblacion,Cp,Provincia,FechaNacimiento,"+
+                "Telefono,Movil,Padre,DniPadre,TelefonoPadre,Email1,Madre,DniMadre,"+
+                "TelefonoMadre,Email2,CentroEstudio,Foto,recibos.numrecibo,fechaemision,"+
+                "fechapago,descripcion,importe,numfactura from alumnos " +
+                "left join recibos on alumnos.codAlumno=recibos.codAlumno " +
+                //"left join detallar on recibos.numrecibo=detallar.numrecibo "+
+                //"where recibos.numfactura is null "+
+                "order by alumnos.CodAlumno,recibos.numrecibo; ");
+        if (resultado!=null){
+            try {
+                while(resultado.next()){
+                    codigoActual=resultado.getInt(1);
+                    if (codigoInicial!=codigoActual){
+                        if (codigoInicial>-1){
+                            ficha=new FichaRecibo(a,listaPorAlumno);
+                            listaAlumnos.add(ficha);
+                            listaPorAlumno=new ArrayList<>();
+                        }   
+                        fecha=(resultado.getString(9)==null?null:Campos.stringToFecha(resultado.getString(9)));
+                    
+                        a=new Alumno(
+                            resultado.getString(2)!=null?resultado.getString(2):"",  //Nia
+                            resultado.getString(3)!=null?resultado.getString(3):"",  //Nombre
+                            resultado.getString(4)!=null?resultado.getString(4):"",  //Apellidos
+                            resultado.getString(5)!=null?resultado.getString(5):"",  //Domicilio
+                            resultado.getString(6)!=null?resultado.getString(6):"",  //Poblacion
+                            resultado.getString(7)!=null?resultado.getString(7):"",  //Cp
+                            resultado.getString(8)!=null?resultado.getString(8):"",  //Provincia
+                            fecha,  //FechaNacimiento
+                            resultado.getString(10)!=null?resultado.getString(10):"",//Telefono
+                            resultado.getString(11)!=null?resultado.getString(11):"",//Movil
+                            resultado.getString(12)!=null?resultado.getString(12):"",//Padre
+                            resultado.getString(13)!=null?resultado.getString(13):"",//DniPadre    
+                            resultado.getString(14)!=null?resultado.getString(14):"",//TelefonoPadre
+                            resultado.getString(15)!=null?resultado.getString(15):"",//Email1
+                            resultado.getString(16)!=null?resultado.getString(16):"",//Madre
+                            resultado.getString(17)!=null?resultado.getString(17):"",//DniMadre
+                            resultado.getString(18)!=null?resultado.getString(18):"",//TelefonoMadre
+                            resultado.getString(19)!=null?resultado.getString(19):"",//Email2
+                            resultado.getString(20)!=null?resultado.getString(20):"",//CentroEstudios
+                            "",                                                      //Observaciones
+                            resultado.getBytes(21));                                  //Foto   
+                            a.setCodigo(resultado.getInt(1));
+                        
+                        codigoInicial=codigoActual;
+                    } 
+                    if (resultado.getString(22)!=null && resultado.getString(27)==null){
+                        fecha=(resultado.getString(23)==null?null:Campos.stringToFecha(resultado.getString(23)));
+                        fechaPago=(resultado.getString(24)==null?null:Campos.stringToFecha(resultado.getString(24)));
+                            ReciboGenerado r=new ReciboGenerado(resultado.getInt(22),
+                                fecha,fechaPago,resultado.getString(25),
+                                resultado.getDouble(26),resultado.getString(27));
+                            listaPorAlumno.add(r);
+                    }
+                }
+                if (listaAlumnos!=null){
+                    ficha=new FichaRecibo(a,listaPorAlumno);
+                    listaAlumnos.add(ficha); 
+                }
+            } catch (SQLException ex) {
+                System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+            }
+        }
+        return listaAlumnos;
+    }
+    
+    public static boolean borrarRecibo(int recibo) {
+        return (ejecucionSentenciaDDL("DELETE FROM detallar WHERE NumRecibo="+
+                recibo+";")>-1 && ejecucionSentenciaDDL("DELETE FROM recibos WHERE NumRecibo="+
+                recibo+";")>-1);
+    }
+    
+   
+    public static boolean modificarRecibo(ReciboGenerado r) {
+        return (ejecucionSentenciaDDL("UPDATE recibos SET FechaPago="+
+            (r.getFechaPago()==null?null:"'"+r.getFechaPago()+"'")+","+
+                "Descripcion='"+r.getDescripcion()+"',"+
+                "Importe="+r.getImporte()+", numfactura="+
+            (r.getFactura()==null?null:Integer.parseInt(r.getFactura()))+" "+
+                "WHERE NumRecibo="+r.getRecibo()+";")>-1
+                );
+    }
+    
+    
+    public static List<Curso> extraerCursosMatriculadosPorAlumno(int codigoAlumno) {
+        List<Curso> listaCursos=new ArrayList<>();
+        ResultSet resultado=ejecucionSentenciaDML("select cursos.codcurso,"+
+            "cursos.descripcion from cursos " +
+            "left join matricular on matricular.codcurso=cursos.codcurso where "+
+            "codalumno="+codigoAlumno+" "+
+            "group by cursos.codcurso,cursos.descripcion order by cursos.codcurso;");
+        
+        if (resultado!=null){
+            try {
+                while(resultado.next()){
+                   listaCursos.add(new Curso(
+                        resultado.getString(1)!=null?resultado.getString(1):"",
+                        resultado.getString(2)!=null?resultado.getString(2):"",
+                        0.0,"",null));
+                }
+            } catch (SQLException ex) {
+                System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+            }
+        } 
+        return listaCursos;
+     }
+    
+    
+    
+    public static List<OcupacionAula> extraerAulasOcupadas() {
+        String codigoInicial="";
+        String codigoActual="";
+        String consultaSQL="";
+        OcupacionAula ocupacionAula=null;
+        DiaOcupacion diaOcupado=null;
+        List<DiaOcupacion> listaDiasOcupados=new ArrayList<>();
+        List<OcupacionAula> aulasOcupadas=new ArrayList<>(); 
+        consultaSQL="select aulas.codaula,aulas.descripcion,aulas.ubicacion,"+
+            "ocupar.diasemana,ocupar.de,ocupar.a,proveedores.nombre,"+
+            "proveedores.apellidos,ocupar.codasignatura from aulas "+
+            "left join ocupar on aulas.codaula=ocupar.codaula " +
+            "left join proveedores on proveedores.cifdni=ocupar.cifdni " +
+            "where codasignatura is not null " +
+            "order by aulas.codaula,diasemana,de;";
+            
+        ResultSet resultado=ejecucionSentenciaDML(consultaSQL);
+        try {
+            while(resultado.next()){
+                codigoActual=resultado.getString(1);
+                if (!codigoInicial.equals(codigoActual)){
+                    if (!codigoInicial.equals("")){
+                        ocupacionAula.setDiasOcupacion(listaDiasOcupados);
+                        aulasOcupadas.add(ocupacionAula);
+                    }   
+                    ocupacionAula= new OcupacionAula(
+                        new Aula(resultado.getString(1),resultado.getString(2),resultado.getString(3)));
+                    listaDiasOcupados=new ArrayList<>();
+                }
+                listaDiasOcupados.add(
+                    new DiaOcupacion(
+                        DayOfWeek.of(resultado.getInt(4)),
+                        LocalTime.parse(resultado.getString(5)),
+                        LocalTime.parse(resultado.getString(6)),
+                        resultado.getString(9),
+                        resultado.getString(8)+", "+resultado.getString(7)));
+                codigoInicial=codigoActual;
+            }
+            if (ocupacionAula.getDiasOcupacion()==null){
+                ocupacionAula.setDiasOcupacion(listaDiasOcupados);
+                aulasOcupadas.add(ocupacionAula); 
+            }
+        } catch (SQLException ex) {
+            System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+        }
+        return aulasOcupadas;
+    }
+
+    public static List<Movimiento> extraerMovimientos(LocalDate inicio, LocalDate fin) {
+        LocalDate fecha;
+        List<Movimiento> listado=new ArrayList<>();
+        String consultaSQL="";
+        consultaSQL="select fecha,apellidos,nombre,sufactura,importebase,iva from gastos " +
+            "left join proveedores on proveedores.cifdni=gastos.cifdni " +
+            "WHERE fecha>='"+Campos.fechaToString(inicio)+"' AND fecha<='"+
+            Campos.fechaToString(fin)+"' "+
+            "order by fecha;";
+         ResultSet resultado=ejecucionSentenciaDML(consultaSQL);
+        try {
+            while(resultado.next()){
+                fecha=(resultado.getString(1)==null?null:Campos.stringToFecha(resultado.getString(1)));
+                    
+                listado.add(new Movimiento(fecha,resultado.getString(2)+", "+resultado.getString(3),
+                        resultado.getString(4),resultado.getDouble(5),resultado.getDouble(6),"G"));
+            }
+        } catch (SQLException ex) {
+            System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+        }
+        return listado;
+    }
+    
+    
+    
+    
+    
+    
+    public static List<FichaRecibo> extraerRecibosPendientes() {
+        String codigoInicial="";
+        String codigoActual="";
+        String consultaSQL="";
+        
+        LocalDate fecha=null;
+        FichaRecibo recibo=null;
+        List<ReciboGenerado> listaReciboGenerado=new ArrayList<>();
+        List<FichaRecibo> alumnos=new ArrayList<>(); 
+        consultaSQL="select alumnos.codalumno,alumnos.nombre,alumnos.apellidos,recibos.fechaemision,"+
+            "recibos.numrecibo,recibos.descripcion,recibos.importe from recibos " +
+            "left join alumnos on recibos.codalumno=alumnos.codalumno " +
+            "where recibos.fechapago is null " +
+            "order by alumnos.apellidos,alumnos.nombre,recibos.fechaemision;";
+            
+        ResultSet resultado=ejecucionSentenciaDML(consultaSQL);
+        try {
+            while(resultado.next()){
+                codigoActual=resultado.getString(1);
+                if (!codigoInicial.equals(codigoActual)){
+                    if (!codigoInicial.equals("")){
+                        recibo.setListaRecibos(listaReciboGenerado);
+                        alumnos.add(recibo);
+                    }   
+                    recibo= new FichaRecibo(
+                        new Alumno("",resultado.getString(2),resultado.getString(3),"","","","",null,"","","","","","","","","","","","",null),null);
+                    listaReciboGenerado=new ArrayList<>();
+                }
+                fecha=(resultado.getString(4)==null?null:Campos.stringToFecha(resultado.getString(4)));
+                listaReciboGenerado.add(
+                    new ReciboGenerado(
+                        resultado.getInt(5),
+                        fecha,
+                        null,
+                        resultado.getString(6),
+                        resultado.getDouble(7),
+                        ""));
+                codigoInicial=codigoActual;
+            }
+            
+            if (recibo!=null && recibo.getListaRecibos()==null){
+                recibo.setListaRecibos(listaReciboGenerado);
+                alumnos.add(recibo); 
+            }
+            
+        } catch (SQLException ex) {
+            System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+        }
+        return alumnos;
+    }
+    
+    public static List<Movimiento> extraerAbonos(LocalDate inicio, LocalDate fin, boolean facturas) {
+        LocalDate fecha;
+        List<Movimiento> listado=new ArrayList<>();
+        String consultaSQL="";
+        String cadenaDescripcion="";
+        int reciboFactura=0;
+        double baseImponible=0.0;
+        double iva=0.0;
+        if (facturas){
+            consultaSQL="select fechapago,apellidos,nombre,numfactura,sum(importe) from recibos "+
+            "left join alumnos on alumnos.codalumno=recibos.codalumno "+
+            "where fechapago is not null AND fechapago>='"+Campos.fechaToString(inicio)+"' AND fechapago<='"+
+            Campos.fechaToString(fin)+"' "+" AND numfactura is not null "+
+            "group by numfactura, fechapago,apellidos,nombre "+
+            "order by fechapago;";        ;        
+        }else{
+            consultaSQL="select fechapago,apellidos,nombre,numrecibo,importe from recibos "+
+                "left join alumnos on alumnos.codalumno=recibos.codalumno "+
+                "where fechapago is not null AND fechapago>='"+Campos.fechaToString(inicio)+"' AND fechapago<='"+
+                Campos.fechaToString(fin)+"' AND numfactura is null "+
+                "order by fechapago;"; 
+        }
+        
+        ResultSet resultado=ejecucionSentenciaDML(consultaSQL);
+        try {
+            while(resultado.next()){
+                fecha=(resultado.getString(1)==null?null:Campos.stringToFecha(resultado.getString(1)));
+                reciboFactura=resultado.getInt(4);
+                
+                if (facturas){
+                    cadenaDescripcion="Factura num:"+fecha.getYear()+"/"+String.format("%05d", reciboFactura);
+                }else{
+                    cadenaDescripcion="Recibo num:"+String.format("%05d", reciboFactura);
+                }    
+                baseImponible=100*resultado.getDouble(5)/(100+ShareData.EMPRESA.getPorcentajeImpuesto());
+                iva=resultado.getDouble(5)-baseImponible;
+                
+                listado.add(new Movimiento(fecha,resultado.getString(2)+", "+resultado.getString(3),
+                        cadenaDescripcion,baseImponible,iva,"I"));
+            }
+        } catch (SQLException ex) {
+            System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+        }
+        return listado;
+    }
+    
+    
+    
+    
+     /**
+     * Función que inserta una factura en la BBDD
+     * @return  Devuelve el número del campo autoincrementado
+     */
+    public static int insertarFactura(){
+        int ultimoId=0;
+        String sentencia="INSERT INTO facturas VALUES (default,current_date) RETURNING NumFactura;";
+        ResultSet resultado=ejecucionSentenciaDML(sentencia); 
+        ultimoId=extraerID(resultado);
+        return ultimoId;
+    }
+    
+    
+    public static List<FichaFactura> extraerFichasFacturas() {
+        int codigoActual=-1;
+        int codigoInicial=-1;
+        int codigoFacturaActual=-1;
+        int codigoFacturaInicial=-1;
+        LocalDate fechaFactura,fecha;
+        String descripcionFactura="";
+        Double importeFactura=0.0;
+        
+        FichaFactura ficha=null;
+        List<FichaFactura> listaAlumnos=new ArrayList<>();
+        List<Factura> listaFacturasPorAlumno = new ArrayList<>();
+        List<ReciboGenerado> listaRecibosPorFactura=new ArrayList<>();
+        Factura factura=null;
+        Alumno a=null;
+        int numeroFactura=0;
+        
+        ResultSet resultado=ejecucionSentenciaDML("select alumnos.CodAlumno,Nia,"+
+                "Nombre,Apellidos,Domicilio,Poblacion,Cp,Provincia,FechaNacimiento,"+
+                "Telefono,Movil,Padre,DniPadre,TelefonoPadre,Email1,Madre,DniMadre,"+
+                "TelefonoMadre,Email2,CentroEstudio,Foto,facturas.numfactura,"+
+                "facturas.fecha,recibos.numrecibo,recibos.descripcion,recibos.importe from facturas " +
+                "left join recibos on facturas.numfactura=recibos.numfactura " +
+                "left join alumnos on alumnos.codalumno=recibos.codalumno " +
+                "order by alumnos.codalumno,facturas.numfactura;");
+        if (resultado!=null){
+            try {
+                while(resultado.next()){
+                    codigoActual=resultado.getInt(1);
+                    codigoFacturaActual=resultado.getInt(22);
+                    // SI es alumno nuevo
+                    if (codigoInicial!=codigoActual){
+                        if (codigoInicial>-1){
+                            //Es nuevo y no es el primero por lo que debo guardar lo del anterior
+                            // Factura y lista de recibos
+                            factura.setDescripcion(descripcionFactura);
+                            factura.setImporteFactura(importeFactura);
+                            factura.setRecibos(listaRecibosPorFactura);
+                            listaFacturasPorAlumno.add(factura);
+                            listaAlumnos.add(new FichaFactura(a,listaFacturasPorAlumno));
+                        }   
+                        fecha=(resultado.getString(9)==null?null:Campos.stringToFecha(resultado.getString(9)));
+                        codigoFacturaInicial=-1;
+                        a=new Alumno(
+                            resultado.getString(2)!=null?resultado.getString(2):"",  //Nia
+                            resultado.getString(3)!=null?resultado.getString(3):"",  //Nombre
+                            resultado.getString(4)!=null?resultado.getString(4):"",  //Apellidos
+                            resultado.getString(5)!=null?resultado.getString(5):"",  //Domicilio
+                            resultado.getString(6)!=null?resultado.getString(6):"",  //Poblacion
+                            resultado.getString(7)!=null?resultado.getString(7):"",  //Cp
+                            resultado.getString(8)!=null?resultado.getString(8):"",  //Provincia
+                            fecha,  //FechaNacimiento
+                            resultado.getString(10)!=null?resultado.getString(10):"",//Telefono
+                            resultado.getString(11)!=null?resultado.getString(11):"",//Movil
+                            resultado.getString(12)!=null?resultado.getString(12):"",//Padre
+                            resultado.getString(13)!=null?resultado.getString(13):"",//DniPadre    
+                            resultado.getString(14)!=null?resultado.getString(14):"",//TelefonoPadre
+                            resultado.getString(15)!=null?resultado.getString(15):"",//Email1
+                            resultado.getString(16)!=null?resultado.getString(16):"",//Madre
+                            resultado.getString(17)!=null?resultado.getString(17):"",//DniMadre
+                            resultado.getString(18)!=null?resultado.getString(18):"",//TelefonoMadre
+                            resultado.getString(19)!=null?resultado.getString(19):"",//Email2
+                            resultado.getString(20)!=null?resultado.getString(20):"",//CentroEstudios
+                            "",                                                      //Observaciones
+                            resultado.getBytes(21));                                  //Foto   
+                        a.setCodigo(resultado.getInt(1));
+                        //Inicializo facturas y recibos
+                        listaFacturasPorAlumno=new ArrayList<>();
+                        listaRecibosPorFactura=new ArrayList<>();
+                        descripcionFactura="";
+                        importeFactura=0.0;
+                        
+                        //Añado el recibo
+                        listaRecibosPorFactura.add(new ReciboGenerado(resultado.getInt(24),
+                            null,null,resultado.getString(25),
+                            resultado.getDouble(26),""));
+                            
+                        fecha=(resultado.getString(23)==null?null:Campos.stringToFecha(resultado.getString(23)));
+                        descripcionFactura=resultado.getString(25);
+                        importeFactura=resultado.getDouble(26);
+                        factura=new Factura(resultado.getInt(22),fecha,"",0.0);
+                            
+                            
+                    // NO es alumno nuevo    
+                    }else{
+                        // SI factura nueva
+                        if (codigoFacturaInicial!=codigoFacturaActual){ 
+                            //SI NO es la primera linea de factura nueva
+                            if (codigoFacturaInicial>-1){
+                                //Debo guardar los recibos
+                                factura.setRecibos(listaRecibosPorFactura);
+                                listaRecibosPorFactura=new ArrayList<>();
+                            }
+                            fecha=(resultado.getString(23)==null?null:Campos.stringToFecha(resultado.getString(23)));
+                            factura=new Factura(resultado.getInt(22),fecha,"",0.0);
+                            descripcionFactura="";
+                            importeFactura=0.0;
+                        }
+                        // SI NO es factura nueva y no es alumno nuevo es recibo nuevo
+                        listaRecibosPorFactura.add(new ReciboGenerado(resultado.getInt(24),
+                            null,null,resultado.getString(25),
+                            resultado.getDouble(26),""));
+                        descripcionFactura=descripcionFactura+" - "+resultado.getString(25);
+                        importeFactura=importeFactura+resultado.getDouble(26);
+
+                    } 
+                    codigoFacturaInicial=codigoFacturaActual;
+                    codigoInicial=codigoActual;
+                }
+                if (a!=null && listaAlumnos!=null){
+                    factura.setDescripcion(descripcionFactura);
+                    factura.setImporteFactura(importeFactura);
+                    factura.setRecibos(listaRecibosPorFactura);
+                    listaFacturasPorAlumno.add(factura);
+                    listaAlumnos.add(new FichaFactura(a,listaFacturasPorAlumno));
+                }
+            } catch (SQLException ex) {
+                System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
+            }
+        }
+        return listaAlumnos;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
+    public static boolean insertarRecibo(ReciboGenerado r, int codigo) {
+        return (ejecucionSentenciaDDL("INSERT INTO recibos VALUES (default,'"+
+                (r.getFechaEmision().equals("")?null:"'"+r.getFechaEmision()+"'")+",'"+
+                (r.getFechaPago().equals("")?null:"'"+r.getFechaPago()+"'")+",'"+
+                r.getDescripcion()+"',"+
+                r.getImporte()+","+
+                "null,"+codigo+");")==1 &&
+                (ejecucionSentenciaDDL("INSERT INTO detallar VALUES (default,'"+r.
+                (r.getFechaEmision().equals("")?null:"'"+r.getFechaEmision()+"'")+",'"+
+                (r.getFechaPago().equals("")?null:"'"+r.getFechaPago()+"'")+",'"+
+                r.getDescripcion()+"',"+
+                );
+    }
+  
+    
+    estructuras[14]="CREATE TABLE "+tablas[14]+" ("+
+                "CodCurso VARCHAR(9) NOT NULL REFERENCES CURSOS,"+
+                "NumRecibo INTEGER NOT NULL REFERENCES RECIBOS,"+
+                "PRIMARY KEY (CodCurso,NumRecibo)"+
+    
+    */
     
 // ---------------------------------------------------------------------------------------
     
@@ -1508,7 +2150,9 @@ public class OperativasBD {
                 "Descripcion VARCHAR (30) NOT NULL,"+
                 "ImporteHora NUMERIC(7,2) NOT NULL,"+
                 "Pago VARCHAR(1) NOT NULL,"+
-                "CifDni VARCHAR(9) NOT NULL UNIQUE REFERENCES PROFESORES"+
+                "CifDni VARCHAR(9) NOT NULL REFERENCES PROFESORES"+
+                // Linea original con el resultado 1 Tutor por curso (único)
+                //"CifDni VARCHAR(9) NOT NULL UNIQUE REFERENCES PROFESORES"+
                 ");";
 
         // CONTENER (CURSOS-ASIGNATURAS)
@@ -1547,7 +2191,7 @@ public class OperativasBD {
         
         // FACTURAS 
         estructuras[12]="CREATE TABLE "+tablas[12]+" ("+
-                "NumFactura VARCHAR(12) PRIMARY KEY,"+
+                "NumFactura SERIAL PRIMARY KEY,"+
                 "Fecha DATE"+
                 ");";
         
@@ -1558,7 +2202,7 @@ public class OperativasBD {
                 "FechaPago DATE,"+
                 "Descripcion TEXT,"+
                 "Importe NUMERIC(8,2),"+
-                "NumFactura VARCHAR(12) REFERENCES FACTURAS,"+
+                "NumFactura INTEGER REFERENCES FACTURAS,"+
                 "CodAlumno INTEGER NOT NULL REFERENCES ALUMNOS"+
                 ");";
         
@@ -1591,6 +2235,9 @@ public class OperativasBD {
                 "Provincia VARCHAR(40),"+
                 "Telefono VARCHAR(50),"+
                 "Email VARCHAR(50),"+
+                "Impuesto VARCHAR(20),"+
+                "Porcentaje NUMERIC(5,2),"+
+                "SoloUnTutor BOOLEAN,"+
                 "Logo BYTEA"+
                 ");";
         
@@ -1614,249 +2261,5 @@ public class OperativasBD {
         return estado;
     }
 
-    public static List<Recibo> generarRecibos() {
-        /*select alumnos.codalumno,alumnos.nombre,alumnos.apellidos,cursos.codcurso,cursos.descripcion,cursos.pago,asignaturas.codasignatura,
-	cursos.importehora,asignaturas.cargahoras from matricular
-	left join alumnos on matricular.codAlumno=alumnos.codAlumno
-	left join cursos on matricular.codcurso=cursos.codcurso
-	left join asignaturas on matricular.codasignatura=asignaturas.codasignatura
-	where fechafin>=now() and fechainicio<=now();*/
-        List<Recibo> listaRecibos=null;
-        Alumno alumno=null;
-        Curso curso=null;
-        Asignatura asignatura=null;
-        List<Curso> listaCursos=null;
-        List<Asignatura> listaAsignaturas=null;
-        int codigoAlumnoActual=-1;
-        int codigoAlumnoInicial=-1;
-        String codigoCursoActual="";
-        String codigoCursoInicial="";
-        String asignaturaActual="";
-        String descripcion="";
-        String sentencia="";
-        ResultSet resultado=null;
-        sentencia="select alumnos.codalumno,alumnos.nombre,alumnos.apellidos,"+
-                "cursos.codcurso,cursos.descripcion,cursos.pago,asignaturas.codasignatura,"+
-                "cursos.importehora,asignaturas.cargahoras from matricular " +
-                "left join alumnos on matricular.codAlumno=alumnos.codAlumno " +
-                "left join cursos on matricular.codcurso=cursos.codcurso " +
-                "left join asignaturas on matricular.codasignatura=asignaturas.codasignatura " +
-                "where fechafin>=now() and fechainicio<=now() "+
-                "order by alumnos.codalumno,cursos.codcurso, asignaturas.codasignatura;";
-        resultado=ejecucionSentenciaDML(sentencia);
-        try {
-            if (resultado.isBeforeFirst()){
-                // Creación de clases
-                listaRecibos=new ArrayList<>();
-                while(resultado.next()){
-                    codigoAlumnoActual=resultado.getInt(1);
-                    codigoCursoActual=resultado.getString(4);
-                    asignaturaActual=resultado.getString(7);
-                    
-                    if (codigoAlumnoInicial!=codigoAlumnoActual){
-                        if (codigoAlumnoInicial>-1){
-                            curso.setAsignaturas(listaAsignaturas);
-                            listaCursos.add(curso);
-                            Recibo recibo=new Recibo(alumno, listaCursos,LocalDate.now());
-                            listaRecibos.add(recibo);                            
-                            //Creo alumno nuevo, lista asignaturas y cursos
-                            alumno=new Alumno("", resultado.getString(2),resultado.getString(3),"","","","",null,
-                            "","","","","","","","","","","","",null);
-                            alumno.setCodigo(resultado.getInt(1));
-                            listaAsignaturas=new ArrayList<>();
-                            listaCursos=new ArrayList<>();
-                            curso=new Curso(resultado.getString(4),resultado.getString(5),
-                                resultado.getDouble(8),resultado.getString(6),null);
-                            
-                            
-                        }else{
-                            //Creo alumno nuevo, lista asignaturas y cursos
-                            //Recibo recibo=new Recibo(alumno, listaCursos,LocalDate.now(), null, anotaciones,0.0, 0.0);
-                            
-                            alumno=new Alumno("", resultado.getString(2),resultado.getString(3),"","","","",null,
-                            "","","","","","","","","","","","",null); 
-                            alumno.setCodigo(resultado.getInt(1));
-                            listaAsignaturas=new ArrayList<>();
-                            listaCursos=new ArrayList<>();
-                            curso=new Curso(resultado.getString(4),resultado.getString(5),
-                                resultado.getDouble(8),resultado.getString(6),null);
-                            
-                        }
-                    }else{
-                        if (!codigoCursoInicial.equals(codigoCursoActual)){
-                            curso.setAsignaturas(listaAsignaturas);
-                            listaCursos.add(curso);
-                            listaAsignaturas=new ArrayList<>();
-                            curso=new Curso(resultado.getString(4),resultado.getString(5),
-                                resultado.getDouble(8),resultado.getString(6),null);
-                        }
-                    }
-                    asignatura=new Asignatura(resultado.getString(7),"",resultado.getInt(9));
-                    listaAsignaturas.add(asignatura);
-                    codigoAlumnoInicial=codigoAlumnoActual;
-                    codigoCursoInicial=codigoCursoActual;
-                            
-                    
-                }
-                curso.setAsignaturas(listaAsignaturas);
-                listaCursos.add(curso);
-                Recibo recibo=new Recibo(alumno, listaCursos,LocalDate.now());
-                listaRecibos.add(recibo);
-                
-                
-                //Comprobamos que los recibos a generar no están duplicados.
-
-                for (Recibo r:listaRecibos){
-                    for (Iterator<Curso> iter = r.getCursos().listIterator(); iter.hasNext(); ) {
-                        Curso c = iter.next();
-                        switch(c.getPago()){
-                            case "A":   sentencia="select count(*) from recibos " +
-                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
-                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
-                                        "and codcurso='"+c.getCodigo()+"' "+
-                                        "and recibos.fechaemision>now()- interval '365 day';";
-                                        break;
-                            case "M":   sentencia="select count(*) from recibos " +
-                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
-                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
-                                        "and codcurso='"+c.getCodigo()+"' "+
-                                        "and recibos.fechaemision>now()- interval '1 month';";
-                                        break;
-                            case "S":   sentencia="select count(*) from recibos " +
-                                        "left join detallar on detallar.numrecibo=recibos.numrecibo " +
-                                        "where codalumno="+r.getAlumno().getCodigo()+" "+
-                                        "and codcurso='"+c.getCodigo()+"' "+
-                                        "and recibos.fechaemision>now()- interval '7 day';";
-                                        break;
-                        }
-                        
-                        
-                            resultado=ejecucionSentenciaDML(sentencia);
-                            if (resultado.next()){
-                                if(resultado.getInt(1)>0){
-                                    Mensajes.msgInfo("RECIBOS DUPLICADOS", "Para "+
-                                        r.getAlumno().getApellidos()+", "+r.getAlumno().getNombre()+
-                                        "Curso: "+c.getDescripcion()+" con pago "+c.getPago());
-                                    iter.remove();
-                                }
-                            }
-                        
-                    }
-                }
-                
-                // Creo los recibos 
-                boolean estadoInsercion=false;
-                Double importeBase=0.0;
-                int ultimoId=0;
-                for (Recibo r:listaRecibos){
-                    importeBase=0.0;
-                    descripcion="";
-                    if (r.getCursos().size()>0){
-                        for (Curso c:r.getCursos()) {
-                            descripcion=descripcion+"Curso:"+c.getDescripcion()+" ";
-                            for (Asignatura a:c.getAsignaturas()){
-                                importeBase=importeBase+(a.getCargaHoras()*c.getImporteHora());
-                            }
-                        }
-                        sentencia="INSERT INTO recibos VALUES (default,'"+
-                            LocalDate.now()+"',null,'"+descripcion+
-                            "',"+importeBase+",null,"+r.getAlumno().getCodigo()+
-                            ") RETURNING numRecibo;";
-                        resultado=ejecucionSentenciaDML(sentencia); 
-                        ultimoId=extraerID(resultado);
-                        if (ultimoId>0) estadoInsercion=true; 
-                        for (Curso c: r.getCursos()){
-                            sentencia="INSERT INTO detallar VALUES ('"+c.getCodigo()+"',"+
-                                ultimoId+");";
-                            if (ejecucionSentenciaDDL(sentencia)==1 && estadoInsercion){
-                                estadoInsercion=true;
-                            }else{
-                                estadoInsercion=false; 
-                            }
-                            if (!estadoInsercion) Mensajes.msgError("INSERCION RECIBOS", "Algo ha fallado..");
-                        }
-                    }
-                }
-            }
-        } catch (SQLException ex) {
-            System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
-        }
-        return listaRecibos;
-    }
-
-    public static List<FichaRecibo> extraerFichasRecibos() {
-        int codigoActual=-1;
-        int codigoInicial=-1;
-        LocalDate fecha, fechaPago;
-        FichaRecibo ficha=null;
-        List<FichaRecibo> listaAlumnos=new ArrayList<>();
-        List<ReciboGenerado> listaPorAlumno = new ArrayList<>();
-        Alumno a=null;
-        ResultSet resultado=ejecucionSentenciaDML("select alumnos.CodAlumno,Nia,"+
-                "Nombre,Apellidos,Domicilio,Poblacion,Cp,Provincia,FechaNacimiento,"+
-                "Telefono,Movil,Padre,DniPadre,TelefonoPadre,Email1,Madre,DniMadre,"+
-                "TelefonoMadre,Email2,CentroEstudio,Foto,numrecibo,fechaemision,"+
-                "fechapago,descripcion,importe,numfactura from alumnos " +
-                "left join recibos on alumnos.codAlumno=recibos.codAlumno " +
-                "where recibos.codAlumno is not null "+
-                "order by alumnos.CodAlumno,numrecibo; ");
-        if (resultado!=null){
-            try {
-                while(resultado.next()){
-                    codigoActual=resultado.getInt(1);
-                    if (codigoInicial!=codigoActual){
-                        if (codigoInicial>-1){
-                            ficha=new FichaRecibo(a,listaPorAlumno);
-                            listaAlumnos.add(ficha);
-                            listaPorAlumno=new ArrayList<>();
-                        }   
-                        fecha=(resultado.getString(9)==null?null:Campos.stringToFecha(resultado.getString(9)));
-                    
-                        a=new Alumno(
-                            resultado.getString(2)!=null?resultado.getString(2):"",  //Nia
-                            resultado.getString(3)!=null?resultado.getString(3):"",  //Nombre
-                            resultado.getString(4)!=null?resultado.getString(4):"",  //Apellidos
-                            resultado.getString(5)!=null?resultado.getString(5):"",  //Domicilio
-                            resultado.getString(6)!=null?resultado.getString(6):"",  //Poblacion
-                            resultado.getString(7)!=null?resultado.getString(7):"",  //Cp
-                            resultado.getString(8)!=null?resultado.getString(8):"",  //Provincia
-                            fecha,  //FechaNacimiento
-                            resultado.getString(10)!=null?resultado.getString(10):"",//Telefono
-                            resultado.getString(11)!=null?resultado.getString(11):"",//Movil
-                            resultado.getString(12)!=null?resultado.getString(12):"",//Padre
-                            resultado.getString(13)!=null?resultado.getString(13):"",//DniPadre    
-                            resultado.getString(14)!=null?resultado.getString(14):"",//TelefonoPadre
-                            resultado.getString(15)!=null?resultado.getString(15):"",//Email1
-                            resultado.getString(16)!=null?resultado.getString(16):"",//Madre
-                            resultado.getString(17)!=null?resultado.getString(17):"",//DniMadre
-                            resultado.getString(18)!=null?resultado.getString(18):"",//TelefonoMadre
-                            resultado.getString(19)!=null?resultado.getString(19):"",//Email2
-                            resultado.getString(20)!=null?resultado.getString(20):"",//CentroEstudios
-                            "",                                                      //Observaciones
-                            resultado.getBytes(21));                                  //Foto   
-                            a.setCodigo(resultado.getInt(1));
-                        
-                        codigoInicial=codigoActual;
-                    } 
-                    if (resultado.getString(22)!=null){
-                        fecha=(resultado.getString(23)==null?null:Campos.stringToFecha(resultado.getString(23)));
-                        fechaPago=(resultado.getString(24)==null?null:Campos.stringToFecha(resultado.getString(24)));
-                    
-                    
-                            ReciboGenerado r=new ReciboGenerado(resultado.getInt(22),
-                                fecha,fechaPago,resultado.getString(25),
-                                resultado.getDouble(26),resultado.getString(27));
-                            listaPorAlumno.add(r);
-                    }
-                }
-                if (listaAlumnos!=null){
-                    ficha=new FichaRecibo(a,listaPorAlumno);
-                    listaAlumnos.add(ficha); 
-                }
-            } catch (SQLException ex) {
-                System.err.println("ERROR: Capa Negocio - OperativasBD.java "+ex.getMessage());
-            }
-        }
-        return listaAlumnos;
-    }
+   
 }

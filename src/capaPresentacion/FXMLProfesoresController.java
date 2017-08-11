@@ -172,7 +172,7 @@ public class FXMLProfesoresController implements Initializable {
     private void clickDeleteBtn(ActionEvent event) {
         if (profesoresListView.getSelectionModel().getSelectedIndex()>-1){
             Profesor profesor=profesoresListView.getSelectionModel().getSelectedItem();
-            if (Mensajes.msgPregunta(profesor.getNombre()+" "+profesor.getApellidos()+" será borrado.")) {
+            if (Mensajes.msgPregunta("Borrado elemento",profesor.getNombre()+" "+profesor.getApellidos()+" será borrado.","¿Quieres borrar el elemento?")) {
                 if (OperativasBD.borrarProfesor(profesor)){
                     Mensajes.msgInfo("ACCION:", "El borrado del Profesor ha sido realizado");
                     profesoresObsList.remove(profesor);

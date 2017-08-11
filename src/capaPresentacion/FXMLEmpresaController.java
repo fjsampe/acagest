@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -40,8 +41,12 @@ public class FXMLEmpresaController implements Initializable {
     @FXML private TextField telefonoTxt;
     @FXML private Button cambiarLogoBtn;
     @FXML private TextField emailTxt;
-    @FXML private ImageView logoImg;
+    @FXML private ImageView logoImg; 
+    @FXML private TextField impuestoTxt;
+    @FXML private TextField porcentajeTxt;
+    @FXML private CheckBox tutorCheck;
     private byte[] imagen;
+   
 
     /**
      * Initializes the controller class.
@@ -56,6 +61,9 @@ public class FXMLEmpresaController implements Initializable {
         provinciaTxt.setText(ShareData.EMPRESA.getProvincia());
         telefonoTxt.setText(ShareData.EMPRESA.getTelefono());
         emailTxt.setText(ShareData.EMPRESA.getEmail());
+        impuestoTxt.setText(ShareData.EMPRESA.getImpuesto());
+        porcentajeTxt.setText(ShareData.EMPRESA.getPorcentajeImpuesto()+"");
+        tutorCheck.setSelected(ShareData.EMPRESA.isTutorPorCurso());
         imagen=ShareData.EMPRESA.getLogo();
         logoImg.setImage(convertirImagen(ShareData.EMPRESA.getLogo()));
         logoImg.setFitHeight(180);
@@ -70,6 +78,8 @@ public class FXMLEmpresaController implements Initializable {
         Campos.fijarTamanoMaximoConPatron(provinciaTxt,40,"[A-Za-zñáéíóúàèìòùüçÑÁÉÍÓÚÀÈÌÒÙÜÇ ]");
         Campos.fijarTamanoMaximoConPatron(telefonoTxt,50,"[0-9+()\\-\\. ]");
         Campos.fijarTamanoMaximoConPatron(emailTxt,50,"[0-9A-Za-zçÇ@\\-\\_\\.]");
+        Campos.fijarTamanoMaximoConPatron(impuestoTxt,20,"[A-Za-z\\-\\_\\.]");
+        Campos.fijarTamanoMaximoConPatron(porcentajeTxt,5,"[0-9\\.]");
     }    
 
     /**
@@ -78,14 +88,17 @@ public class FXMLEmpresaController implements Initializable {
      */
     @FXML
     private void clickAceptarBtn(ActionEvent event) {
-        if (OperativasBD.cambiarEmpresa(new Empresa(nifTxt.getText(),nombreTxt.getText(),
+        if (Campos.validarCampoNumerico(porcentajeTxt.getText())){
+            if (OperativasBD.cambiarEmpresa(new Empresa(nifTxt.getText(),nombreTxt.getText(),
                 domicilioTxt.getText(),poblacionTxt.getText(), cpTxt.getText(),
                 provinciaTxt.getText(), telefonoTxt.getText(),emailTxt.getText(),
-                imagen
+                impuestoTxt.getText(), Double.parseDouble(porcentajeTxt.getText()),
+                tutorCheck.selectedProperty().getValue(),imagen
                 ))){
-            Mensajes.msgInfo("DATOS EMPRESA", "Los datos de la empresa han sido actualizados");  
-        }else{
-            Mensajes.msgError("DATOS EMPRESA","Los datos de empresa no han sido actualizados");
+                Mensajes.msgInfo("DATOS EMPRESA", "Los datos de la empresa han sido actualizados");  
+            }else{
+                Mensajes.msgError("DATOS EMPRESA","Los datos de empresa no han sido actualizados");
+            }
         }
     }
 

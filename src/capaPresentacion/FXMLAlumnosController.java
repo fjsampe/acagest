@@ -199,7 +199,7 @@ public class FXMLAlumnosController implements Initializable {
     private void clickDeleteBtn(ActionEvent event) {
         if (alumnosListView.getSelectionModel().getSelectedIndex()>-1){
             Alumno alumno=alumnosListView.getSelectionModel().getSelectedItem();
-            if (Mensajes.msgPregunta(alumno.getNombre()+" "+alumno.getApellidos()+" será borrado.")) {
+            if (Mensajes.msgPregunta("Borrado elemento",alumno.getNombre()+" "+alumno.getApellidos()+" será borrado.","¿Quieres borrar el elemento?")) {
                 if (OperativasBD.borrarAlumno(alumno)){
                     Mensajes.msgInfo("ACCION:", "El borrado del Alumno ha sido realizado");
                     alumnosObsList.remove(alumno);

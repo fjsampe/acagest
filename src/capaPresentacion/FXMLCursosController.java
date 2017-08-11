@@ -4,6 +4,7 @@ import capaNegocio.Asignatura;
 import capaNegocio.Curso;
 import capaNegocio.OperativasBD;
 import capaNegocio.Profesor;
+import capaNegocio.ShareData;
 import capaNegocio.TipoPago;
 import static capaPresentacion.resources.Campos.fijarTamanoMaximoConPatron;
 import capaPresentacion.resources.HeaderFooterPDF;
@@ -175,7 +176,8 @@ public class FXMLCursosController implements Initializable {
     private void clickAddBtn(ActionEvent event) {
         MODOEDICION=false;
         inicializarVariables();
-        mostrarProfesoresNoUsados(true);
+        //mostrarProfesoresNoUsados(true);
+        mostrarProfesoresNoUsados(ShareData.EMPRESA.isTutorPorCurso());
         habilitarCamposEdicion(true);
         inicializarCampos();
         mostrarListaAsignaturasNoUsadas(false);
@@ -189,7 +191,8 @@ public class FXMLCursosController implements Initializable {
     private void clickEditBtn(ActionEvent event) {
         MODOEDICION=true;
         //inicializarVariables();
-        mostrarProfesoresNoUsados(true);
+        //mostrarProfesoresNoUsados(true);
+        mostrarProfesoresNoUsados(ShareData.EMPRESA.isTutorPorCurso());
         profesoresObsList.add(cursosListView.getSelectionModel().getSelectedItem().getTutor());
         // añado el profesor actual en esta linea
         habilitarCamposEdicion(true);
@@ -206,7 +209,7 @@ public class FXMLCursosController implements Initializable {
     private void clickDeleteBtn(ActionEvent event) {
         if (cursosListView.getSelectionModel().getSelectedIndex()>-1){
             Curso curso=cursosListView.getSelectionModel().getSelectedItem();
-            if (Mensajes.msgPregunta(curso.getDescripcion()+"("+curso.getCodigo()+") será borrado.")) {
+            if (Mensajes.msgPregunta("Borrado elemento",curso.getDescripcion()+"("+curso.getCodigo()+") será borrado.","¿Quieres borrar el elemento?")) {
                 if (OperativasBD.borrarCurso(curso)){
                     Mensajes.msgInfo("ACCION:", "El borrado del Curso ha sido realizado");
                     cursosObsList.remove(curso);

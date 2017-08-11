@@ -102,7 +102,7 @@ public class FXMLUsuariosController implements Initializable {
             if (usuario.getUsername().equals("admin")){
                 Mensajes.msgInfo("ATENCION:", "El usuario administrador no puede ser borrado");
             }else{
-                if (Mensajes.msgPregunta(usuario.getUsername()+" será borrado.")) {
+                if (Mensajes.msgPregunta("Borrado elemento",usuario.getUsername()+" será borrado.","¿Quieres borrar el elemento?")) {
                     if (OperativasBD.borrarUsuario(usuario)){
                         Mensajes.msgInfo("ACCION:", "El borrado del Usuario ha sido realizado");
                         usuariosObsList.remove(usuario);
