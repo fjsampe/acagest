@@ -335,7 +335,7 @@ public class MostrarPDF {
             datos.add(new CamposTablaPDF("TELEFONOS:","L",false));
             datos.add(new CamposTablaPDF(matricula.getAlumno().getTelefono().trim()+" / "+matricula.getAlumno().getMovil(),"L",false));
             datos.add(new CamposTablaPDF("FECHA NACIMIENTO:","L",false));
-            datos.add(new CamposTablaPDF(matricula.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),"L",false));
+            datos.add(new CamposTablaPDF(matricula.getAlumno().getNacimiento()!=null?matricula.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")):" ","L",false));
             datos.add(new CamposTablaPDF("CENTRO ESTUDIOS:","L",false));
             datos.add(new CamposTablaPDF(matricula.getAlumno().getCentro(),"L",false));
             documento.add(generaCuerpo1(datos));
@@ -442,7 +442,7 @@ public class MostrarPDF {
             datos.add(new CamposTablaPDF("TELEFONOS:","L",false));
             datos.add(new CamposTablaPDF(ficha.getAlumno().getTelefono().trim()+" / "+ficha.getAlumno().getMovil(),"L",false));
             datos.add(new CamposTablaPDF("FECHA NACIMIENTO:","L",false));
-            datos.add(new CamposTablaPDF(ficha.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),"L",false));
+            datos.add(new CamposTablaPDF(ficha.getAlumno().getNacimiento()!=null?ficha.getAlumno().getNacimiento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")):" ","L",false));
             datos.add(new CamposTablaPDF("CENTRO ESTUDIOS:","L",false));
             datos.add(new CamposTablaPDF(ficha.getAlumno().getCentro(),"L",false));
             documento.add(generaCuerpo1(datos));
@@ -728,6 +728,7 @@ public class MostrarPDF {
      * @param bordes        Tamaño del Borde
      * @param sizeFuente    Tamaño de la letra
      * @param datos         Datos a visualizar
+     * @param bordesTabla   True=Con bordes  False=Sin bordes
      * @return              Devuelve la tabla generada
      */
     private PdfPTable generaTabla(int columnas, float[] sizeColumnas, int padding, int bordes, int sizeFuente, List<CamposTablaPDF> datos, boolean bordesTabla) {

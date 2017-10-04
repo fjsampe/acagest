@@ -109,12 +109,12 @@ public class FXMLMatriculacionesController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        habilitarCamposEdicion(false);
+        
         showIconos();
         cargarListaAlumnos();
         cargarListaCursos();
         inicializarTablaMatriculaciones();
-        
+        habilitarCamposEdicion(false);
         
         // Listener Filtro
         FilteredList<FichaMatricula> listaFiltrada = new FilteredList<>(alumnosObsList, s -> true);
@@ -151,8 +151,21 @@ public class FXMLMatriculacionesController implements Initializable {
                 asignaturaMatriculaInicial=new ArrayList<>();
                 asignaturaMatriculaInicial.addAll(matriculasObsList); 
                 matriculacionesTable.setItems(matriculasObsList);               
+                if (matriculasObsList.size()==0){
+                    delAsignaturaBtn.setDisable(true);
+                }
             }
         }); 
+        
+        
+        matriculacionesTable.getSelectionModel().selectedItemProperty().addListener((obs,oldSelection,newSelection) ->{
+            if (newSelection!=null){
+                delAsignaturaBtn.setDisable(false);       
+            }else{
+                delAsignaturaBtn.setDisable(true);
+            }
+        }); 
+        
         
         // Listener Selección Curso ComboBox
         cursoCmb.getSelectionModel().selectedItemProperty().addListener((obs,oldSelection,newSelection) ->{
@@ -172,6 +185,7 @@ public class FXMLMatriculacionesController implements Initializable {
     @FXML
     private void clickEditBtn(ActionEvent event) {
         habilitarCamposEdicion(true);
+        btnAceptar.setDisable(true);
     }
     
     /**
@@ -294,6 +308,7 @@ public class FXMLMatriculacionesController implements Initializable {
                     matriculacionesTable.getSelectionModel().select(m);
                     matriculacionesTable.scrollTo(m);
                     limpiarComboAsignatura();
+                    btnAceptar.setDisable(false);
                 }else{
                     Mensajes.msgError("ERROR MATRICULACION", "Verifica fechas y asignaturas");
                 }
@@ -314,6 +329,7 @@ public class FXMLMatriculacionesController implements Initializable {
         Matricula m=matriculacionesTable.getSelectionModel().getSelectedItem();
         matriculasObsList.remove(m);
         matriculacionesTable.setItems(matriculasObsList);
+        if (btnAceptar.isDisable()) btnAceptar.setDisable(false);
     }
     
     /**
@@ -407,7 +423,11 @@ public class FXMLMatriculacionesController implements Initializable {
      */
     private void habilitarCamposEdicion(boolean b) {
         alumnosListView.setDisable(b);
-        barraOpciones.setDisable(b);
+        if (alumnosObsList.isEmpty()){
+            barraOpciones.setDisable(!b);
+        }else{
+            barraOpciones.setDisable(b);
+        }
         formularioDatosAlumno.setDisable(true);
         formularioDatosMatriculaciones.setDisable(!b);
         barraConfirmacion.setDisable(!b);

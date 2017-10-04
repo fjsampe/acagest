@@ -286,7 +286,7 @@ public class FXMLGastosController implements Initializable {
      */
     private void habilitarCamposEdicion(boolean b) {
         proveedoresListView.setDisable(b);
-        barraOpciones.setDisable(b);
+        barraOpciones.setDisable(!b);
         formularioDatosProveedor.setDisable(true);
         formularioDatosGastos.setDisable(!b);
         barraConfirmacion.setDisable(!b);

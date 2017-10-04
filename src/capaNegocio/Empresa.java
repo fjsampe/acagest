@@ -5,22 +5,24 @@ package capaNegocio;
  * Esta clase contiene los parámetros de configuración de la empresa
  * 
  * Atributos:
- *  nif         : Nif de la empresa
- *  nombre      : Nombre de la empresa
- *  domicilio   : Domicilio de la empresa
- *  poblacion   : Población de la empresa
- *  cp          : Código postal de la empresa
- *  provincia   : Província de la empresa
- *  telefono    : Teléfono de la empresa
- *  email       : Email de la empresa
- *  logo        : Logo de la empresa
+ *  nif                 : Nif de la empresa
+ *  nombre              : Nombre de la empresa
+ *  domicilio           : Domicilio de la empresa
+ *  poblacion           : Población de la empresa
+ *  cp                  : Código postal de la empresa
+ *  provincia           : Província de la empresa
+ *  telefono            : Teléfono de la empresa
+ *  email               : Email de la empresa
+ *  impuesto            : Impuesto en facturas
+ *  porcentajeImpuesto  : Porcentaje del impuesto
+ *  logo                : Logo de la empresa
  * 
  * Constructores, Getters y Setters
  * 
  * Métodos:
  * 
  * @author Francisco José Sampedro Lujan
- * @version 0.1
+ * @version 0.2
  */
 public class Empresa {
     private String nif;

@@ -102,12 +102,12 @@ public class FXMLExaminarController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        habilitarCamposEdicion(false);
+        
         showIconos();
         //cargarListaAsignaturas();
         cargarListaAlumnos();
         inicializarTablaExamenes();
-        
+        habilitarCamposEdicion(false);
         // Listener Filtro
         FilteredList<FichaExamen> listaFiltrada = new FilteredList<>(alumnosObsList, s -> true);
         filtroTxt.textProperty().addListener(obs->{
@@ -143,9 +143,22 @@ public class FXMLExaminarController implements Initializable {
                 examenesObsList=FXCollections.observableList(datosAlumnoSeleccionado.getListaExamenes());
                 examenesInicial=new ArrayList<>();
                 examenesInicial.addAll(examenesObsList); 
-                examenesTable.setItems(examenesObsList);               
+                examenesTable.setItems(examenesObsList);
+                if (examenesObsList.size()==0){
+                    delExamenBtn.setDisable(true);
+                }
             }
         }); 
+        
+        examenesTable.getSelectionModel().selectedItemProperty().addListener((obs,oldSelection,newSelection) ->{
+            if (newSelection!=null){
+                delExamenBtn.setDisable(false);       
+            }else{
+                delExamenBtn.setDisable(true);
+            }
+        }); 
+        
+        
         alumnosListView.getSelectionModel().selectFirst();
         fijarTamanoMaximoConPatron(notaTxt,5,"[0-9\\.]");
         Campos.validaCampoFecha(fechaPicker);  
@@ -212,6 +225,7 @@ public class FXMLExaminarController implements Initializable {
     private void clickEditBtn(ActionEvent event) {
         cargarListaAsignaturas(datosAlumnoSeleccionado.getAlumno().getCodigo());
         habilitarCamposEdicion(true);
+        btnAceptar.setDisable(true);
     }
 
     /**
@@ -277,6 +291,7 @@ public class FXMLExaminarController implements Initializable {
                     examenesTable.getSelectionModel().select(e);
                     examenesTable.scrollTo(e);
                     limpiarCombos();
+                    btnAceptar.setDisable(false);
                 }
                 
             }else{
@@ -294,6 +309,7 @@ public class FXMLExaminarController implements Initializable {
         Examen e=examenesTable.getSelectionModel().getSelectedItem();
         examenesObsList.remove(e);
         examenesTable.setItems(examenesObsList);
+        if (btnAceptar.isDisable()) btnAceptar.setDisable(false);
     }
     
     /**
@@ -302,7 +318,11 @@ public class FXMLExaminarController implements Initializable {
      */
     private void habilitarCamposEdicion(boolean b) {
         alumnosListView.setDisable(b);
-        barraOpciones.setDisable(b);
+        if (alumnosObsList.isEmpty()){
+            barraOpciones.setDisable(!b);
+        }else{
+            barraOpciones.setDisable(b);
+        }
         formularioDatosAlumno.setDisable(true);
         formularioDatosExamenes.setDisable(!b);
         barraConfirmacion.setDisable(!b);

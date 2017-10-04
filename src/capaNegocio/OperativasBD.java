@@ -897,7 +897,7 @@ public class OperativasBD {
                             listaMatriculasPorAlumno.add(m);
                     }
                 }
-                if (listaAlumnos!=null){
+                if (a!=null && listaAlumnos!=null){
                     fichaMatricula=new FichaMatricula(a,listaMatriculasPorAlumno);
                     listaAlumnos.add(fichaMatricula); 
                 }
@@ -1015,7 +1015,7 @@ public class OperativasBD {
                         aula=null;
                     } 
                 }
-                if (listaProfesores!=null){
+                if (p!=null && listaProfesores!=null){
                     fichaPlanificador=new FichaPlanificador(p,listaPlanesPorProfesor);
                     listaProfesores.add(fichaPlanificador);
                 }
@@ -1148,7 +1148,7 @@ public class OperativasBD {
                     }
                     codigoAlumnoInicial=codigoAlumnoActual;
                 } 
-                if (listaExamenes!=null){
+                if (a!=null && listaExamenes!=null){
                     fichaExamen=new FichaExamen(a,listaExamenes);
                     listaExamenesPorAlumno.add(fichaExamen);
                 }
@@ -1268,7 +1268,7 @@ public class OperativasBD {
                     
                     codigoProveedorInicial=codigoProveedorActual;
                 } 
-                if (listaGastos!=null){
+                if (p!=null && listaGastos!=null){
                     fichaGasto=new FichaGasto(p,listaGastos);
                     listaGastosPorProveedor.add(fichaGasto);
                 }
@@ -1549,7 +1549,7 @@ public class OperativasBD {
                             listaPorAlumno.add(r);
                     }
                 }
-                if (listaAlumnos!=null){
+                if (a!=null && listaAlumnos!=null){
                     ficha=new FichaRecibo(a,listaPorAlumno);
                     listaAlumnos.add(ficha); 
                 }
@@ -1641,7 +1641,7 @@ public class OperativasBD {
                         resultado.getString(8)+", "+resultado.getString(7)));
                 codigoInicial=codigoActual;
             }
-            if (ocupacionAula.getDiasOcupacion()==null){
+            if (ocupacionAula!=null && ocupacionAula.getDiasOcupacion()==null){
                 ocupacionAula.setDiasOcupacion(listaDiasOcupados);
                 aulasOcupadas.add(ocupacionAula); 
             }

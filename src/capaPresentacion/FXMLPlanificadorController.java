@@ -122,14 +122,14 @@ public class FXMLPlanificadorController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        habilitarCamposEdicion(false);
+        
         showIconos();
         cargarListaAsignaturas();
         cargarListaAulas();
         cargarListaProfesores();
         inicializarSpinersYComboSemanal();
         inicializarTablaPlanes();
-        
+        habilitarCamposEdicion(false);
         // Listener Filtro
         FilteredList<FichaPlanificador> listaFiltrada = new FilteredList<>(profesoresObsList, s -> true);
         filtroTxt.textProperty().addListener(obs->{
@@ -166,9 +166,23 @@ public class FXMLPlanificadorController implements Initializable {
                 planesObsList=FXCollections.observableList(datosProfesorSeleccionado.getListaPlanes());
                 planesInicial=new ArrayList<>();
                 planesInicial.addAll(planesObsList); 
-                planificacionTable.setItems(planesObsList);               
+                planificacionTable.setItems(planesObsList); 
+                if (planesObsList.size()==0){
+                    delPlanBtn.setDisable(true);
+                }
             }
         }); 
+        
+        
+        planificacionTable.getSelectionModel().selectedItemProperty().addListener((obs,oldSelection,newSelection) ->{
+            if (newSelection!=null){
+                delPlanBtn.setDisable(false);       
+            }else{
+                delPlanBtn.setDisable(true);
+            }
+        }); 
+        
+        
         profesoresListView.getSelectionModel().selectFirst();
     }    
 
@@ -484,7 +498,11 @@ public class FXMLPlanificadorController implements Initializable {
      */
     private void habilitarCamposEdicion(boolean b) {
         profesoresListView.setDisable(b);
-        barraOpciones.setDisable(b);
+        if (profesoresObsList.isEmpty()){
+            barraOpciones.setDisable(!b);
+        }else{
+            barraOpciones.setDisable(b);
+        }
         formularioDatosAlumno.setDisable(true);
         formularioDatosMatriculaciones.setDisable(!b);
         barraConfirmacion.setDisable(!b);

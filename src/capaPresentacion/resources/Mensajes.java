@@ -46,8 +46,11 @@ public class Mensajes {
     }
     
     /**
+     * /**
      * Función que muestra una alerta con mensaje de pregunta
-     * @param message   Mensaje
+     * @param mensaje1  Título de la alerta
+     * @param mensaje2  Cabecera de la alerta
+     * @param mensaje3  Mensaje de la alerta
      * @return          Devuelve booleano (True=Aceptar, False=Cancelar)
      */
     public static boolean msgPregunta(String mensaje1, String mensaje2, String mensaje3) {

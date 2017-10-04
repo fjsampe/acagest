@@ -105,11 +105,11 @@ public class FXMLFacturasController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         fechaEmisionFacturaCol.setStyle( "-fx-alignment: CENTER;");
-        habilitarCamposEdicion(false);
+        
         showIconos();
         cargarListaAlumnos();
         inicializarTablaFacturas();
-        
+        habilitarCamposEdicion(false);
         // Listener Filtro
         FilteredList<FichaFactura> listaFiltrada = new FilteredList<>(alumnosObsList, s -> true);
         filtroTxt.textProperty().addListener(obs->{
@@ -180,6 +180,7 @@ public class FXMLFacturasController implements Initializable {
     @FXML
     private void clickEditBtn(ActionEvent event) {
         habilitarCamposEdicion(true);
+        
         //verificaSizeFactura();
         facturasTable.getSelectionModel().selectFirst();
     }
@@ -229,7 +230,11 @@ public class FXMLFacturasController implements Initializable {
      */
     private void habilitarCamposEdicion(boolean b) {
         alumnosListView.setDisable(b);
-        barraOpciones.setDisable(b);
+        if (alumnosObsList.isEmpty()){
+            barraOpciones.setDisable(!b);
+        }else{
+            barraOpciones.setDisable(b);
+        }
         formularioDatosAlumno.setDisable(true);
         formularioDatosMatriculaciones.setDisable(!b);
         barraConfirmacion.setDisable(!b);

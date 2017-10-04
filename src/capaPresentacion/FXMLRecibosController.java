@@ -116,10 +116,11 @@ public class FXMLRecibosController implements Initializable {
         
         fechaEmisionReciboCol.setStyle( "-fx-alignment: CENTER;");
         fechaPagoReciboCol.setStyle( "-fx-alignment: CENTER;");
-        habilitarCamposEdicion(false);
+        
         showIconos();
         cargarListaAlumnos();
         inicializarTablaRecibos();
+        habilitarCamposEdicion(false);
         edicionStatus=false;
         // Listener Filtro
         FilteredList<FichaRecibo> listaFiltrada = new FilteredList<>(alumnosObsList, s -> true);
@@ -198,7 +199,7 @@ public class FXMLRecibosController implements Initializable {
     
     /**
      * Acción al ser pulsado el botón para BORRAR
-     * @param event 
+     * @param event Evento
      */
     @FXML
     private void clickDelReciboBtn(ActionEvent event) {
@@ -214,7 +215,7 @@ public class FXMLRecibosController implements Initializable {
 
     /**
      * Acción al ser pulsado el botón para EDITAR UN RECIBO
-     * @param event 
+     * @param event Evento
      */
     @FXML
     private void clickEditarReciboBtn(ActionEvent event) {
@@ -244,7 +245,7 @@ public class FXMLRecibosController implements Initializable {
     
     /**
      * Acción al ser pulsado el botón para IMPRIMIR UN RECIBO
-     * @param event 
+     * @param event Evento
      */
     @FXML
     private void clickImpReciboBtn(ActionEvent event) {
@@ -285,7 +286,7 @@ public class FXMLRecibosController implements Initializable {
     
     /**
      * Acción al ser pulsado el botón para FACTURAR
-     * @param event 
+     * @param event Evento
      */
     @FXML
     private void clickFacturarBtn(ActionEvent event) {
@@ -475,7 +476,12 @@ public class FXMLRecibosController implements Initializable {
      */
     private void habilitarCamposEdicion(boolean b) {
         alumnosListView.setDisable(b);
-        barraOpciones.setDisable(b);
+        if (alumnosObsList.isEmpty()){
+            barraOpciones.setDisable(!b);
+        }else{
+            barraOpciones.setDisable(b);
+        }
+        
         formularioDatosAlumno.setDisable(true);
         formularioDatosMatriculaciones.setDisable(!b);
         barraConfirmacion.setDisable(!b);
